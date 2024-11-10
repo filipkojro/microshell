@@ -45,9 +45,23 @@ int main(){
     }
     else {
         char* path_to_command = concat("./commands/", command);
-        char *args[] = {NULL};
+        char *args[] = {"./", NULL};
 
-        execv(path_to_command, args);
+        char ar[100];
+        char rest[100];
+        char* temp = arguments;
+
+        for (int i = 0; i < 20; i++){
+            if (strlen(temp) <= 0) break;
+            sscanf(temp, " %s", ar);
+
+            temp += sizeof(char) * (strlen(ar) + 1);
+            printf("%dnxtarg:%s\n", i, ar);
+        }
+
+        // execv(path_to_command, args);
+
+        execvp("ls", args);
 
         printf("nie bylo takiej komendy\n");
 

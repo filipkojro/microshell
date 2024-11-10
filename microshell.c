@@ -26,14 +26,12 @@ int main(){
     if (getcwd(cwd, sizeof(cwd)) == NULL) {
         printf("getcwd() error?\n");
         return 1;
-    } 
-    // printf("%s\n\n", cwd);
-    
+    }
 
     printf("%s $ ", cwd);
     scanf("%s%[^\n]", command, arguments);
 
-    printf("command:%s\narguments:%s\n", command, arguments);
+    // printf("command:%s\narguments:%s\n", command, arguments);
 
     if (fork() != 0){
         // printf("rodzic?\n");
@@ -41,31 +39,34 @@ int main(){
         int status;
         waitpid(-1, &status, 0);
 
-        printf("returned with status %d\n", status);
+        if (status != 0){
+            printf("returned with status %d\n", status);
+        }
     }
     else {
-        char* path_to_command = concat("./commands/", command);
-        char *args[] = {"./", NULL};
+        int argc = 0;
+        for (int c = 0; c < strlen(arguments); c++){
+            if (arguments[c] == ' ') argc++;
+        }     
+
+        char *args[argc + 1];
+        args[argc] = NULL;
 
         char ar[100];
-        char rest[100];
-        char* temp = arguments;
+        char* temp_args = arguments;
+        for (int i = 0; i < argc; i++){
+            if (strlen(temp_args) <= 0) break;
+            sscanf(temp_args, " %s", ar);
+            args[i] = ar;
 
-        for (int i = 0; i < 20; i++){
-            if (strlen(temp) <= 0) break;
-            sscanf(temp, " %s", ar);
-
-            temp += sizeof(char) * (strlen(ar) + 1);
-            printf("%dnxtarg:%s\n", i, ar);
+            temp_args += sizeof(char) * (strlen(ar) + 1);
+            // printf("%dnxtarg:%s\n", i, ar);
         }
 
-        // execv(path_to_command, args);
-
-        execvp("ls", args);
+        execvp(command, args);
 
         printf("nie bylo takiej komendy\n");
 
-        free(path_to_command);
         return 0;
     }
     return 0;

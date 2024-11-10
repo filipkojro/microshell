@@ -40,7 +40,7 @@ int main(){
         waitpid(-1, &status, 0);
 
         if (status != 0){
-            printf("returned with status %d\n", status);
+            printf("returned with status: %d\n", status);
         }
     }
     else {

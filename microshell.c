@@ -16,9 +16,9 @@
 char* concat(const char *s1, const char *s2) {
     const size_t len1 = strlen(s1);
     const size_t len2 = strlen(s2);
-    char *result = malloc(len1 + len2 + 1); // +1 for the null-terminator
+    char *result = malloc(len1 + len2 + 1); // +1 for terminator
     memcpy(result, s1, len1);
-    memcpy(result + len1, s2, len2 + 1); // +1 to copy the null-terminator
+    memcpy(result + len1, s2, len2 + 1); // +1 to copy terminator
     return result;
 }
 
@@ -50,7 +50,7 @@ int main(){
         waitpid(-1, &status, 0);
 
         if (status != 0){
-            printf("returned with status: %d\n", status);
+            printf("reteturned with status: %d\n", status);
         }
     }
     else {
@@ -79,10 +79,11 @@ int main(){
             temp_args += sizeof(char) * (strlen(ar) + 1);
             // printf("%dnxtarg:%s\n", i, ar);
         }
-
+        execv(command, args);
+        printf("did not find in execv\n");
         execvp(command, args);
 
-        printf(RED_TEXT"nie bylo takiej komendy\n");
+        printf(RED_TEXT"nie ma takiej komendy\n");
 
         return 0;
     }

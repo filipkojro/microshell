@@ -8,6 +8,11 @@
 #define true 1
 #define false 0
 
+#define RED_TEXT "\033[1;31m"
+#define GREEN_TEXT "\033[1;32m"
+#define BLUE_TEXT "\033[1;34m"
+#define RESET_TEXT "\033[1;0m"
+
 char* concat(const char *s1, const char *s2) {
     const size_t len1 = strlen(s1);
     const size_t len2 = strlen(s2);
@@ -22,16 +27,21 @@ int main(){
     char arguments[128];
 
     char cwd[4096];
+    char* user = getlogin();
+    char hostname[1024];
 
-    if (getcwd(cwd, sizeof(cwd)) == NULL) {
-        printf("getcwd() error?\n");
+    if (gethostname(hostname, sizeof(hostname)) != 0){
+        printf(RED_TEXT"gethostname() error?\n");
         return 1;
     }
 
-    printf("%s $ ", cwd);
-    scanf("%s%[^\n]", command, arguments);
+    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+        printf(RED_TEXT"getcwd() error?\n");
+        return 1;
+    }
 
-    // printf("command:%s\narguments:%s\n", command, arguments);
+    printf(BLUE_TEXT"%s@%s "GREEN_TEXT"%s"RESET_TEXT" $ ", user, hostname, cwd);
+    scanf("%s%[^\n]", command, arguments);
 
     if (fork() != 0){
         // printf("rodzic?\n");
@@ -65,7 +75,7 @@ int main(){
 
         execvp(command, args);
 
-        printf("nie bylo takiej komendy\n");
+        printf(RED_TEXT"nie bylo takiej komendy\n");
 
         return 0;
     }

@@ -23,8 +23,8 @@ char* concat(const char *s1, const char *s2) {
 }
 
 int main(){
-    char command[64];
-    char arguments[128];
+    char command[32];
+    char arguments[1024];
 
     char cwd[4096];
     char* user = getlogin();
@@ -55,10 +55,17 @@ int main(){
     }
     else {
         int argc = 0;
-        for (int c = 0; c < strlen(arguments); c++){
-            if (arguments[c] == ' ') argc++;
-        }     
 
+        int c;
+        for (c = 0; c < strlen(arguments); c++){
+            if (arguments[c] == ' ') argc++;
+        }
+        if (c == 0){
+            arguments[0] = ' ';
+            arguments[1] = '\0';
+            argc++;
+        }
+        
         char *args[argc + 1];
         args[argc] = NULL;
 

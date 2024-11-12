@@ -25,6 +25,10 @@ char* concat(const char *s1, const char *s2) {
 }
 
 int main(){
+
+    printf("%s\n", getenv("PATH"));
+    setenv("PATH", concat("/Users/filip/Sync/UAM/SO/microshell/commands/bin:", getenv("PATH")), 1);
+
     char command[32];
     char arguments[1024];
 
@@ -81,8 +85,7 @@ int main(){
             temp_args += sizeof(char) * (strlen(ar) + 1);
             // printf("%dnxtarg:%s\n", i, ar);
         }
-        execv(command, args);
-        printf("did not find in execv\n");
+
         execvp(command, args);
 
         printf(RED_TEXT"nie ma takiej komendy\n");

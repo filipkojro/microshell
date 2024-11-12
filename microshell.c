@@ -8,6 +8,8 @@
 #define true 1
 #define false 0
 
+// colors using ANSI escape code \033[1;{color code}m
+#define BLINK "\033[5m"
 #define RED_TEXT "\033[1;31m"
 #define GREEN_TEXT "\033[1;32m"
 #define BLUE_TEXT "\033[1;34m"

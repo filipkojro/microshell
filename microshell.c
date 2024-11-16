@@ -25,9 +25,8 @@ char* concat(const char *s1, const char *s2) {
 }
 
 int main(){
-
-    printf("%s\n", getenv("PATH"));
     setenv("PATH", concat("/Users/filip/Sync/UAM/SO/microshell/commands/bin:", getenv("PATH")), 1);
+    // printf("%s\n", getenv("PATH"));
 
     char command[32];
     char arguments[1024];

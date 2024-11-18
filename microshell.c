@@ -71,12 +71,13 @@ int main(){
             argc++;
         }
         
-        char *args[argc + 1];
+        char *args[argc + 2];
+        args[0] = command;
         args[argc] = NULL;
 
         char ar[100];
         char* temp_args = arguments;
-        for (int i = 0; i < argc; i++){
+        for (int i = 1; i < argc+1; i++){
             if (strlen(temp_args) <= 0) break;
             sscanf(temp_args, " %s", ar);
             args[i] = ar;

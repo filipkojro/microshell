@@ -1,4 +1,4 @@
-all: microshell commands
+all: microshell test mycat mycp
 
 # SRCS = $(wildcard commands/*.c)
 
@@ -8,8 +8,14 @@ all: microshell commands
 microshell: microshell.c
 	gcc -Wall -ansi -o microshell microshell.c
 
-commands: commands/bin | commands/test.c
+test: commands/bin | commands/test.c
 	gcc -Wall -ansi -o commands/bin/test commands/test.c
+
+mycat: commands/bin | commands/mycp.c
+	gcc -Wall -ansi -o commands/bin/mycp commands/mycp.c
+
+mycp: commands/bin | commands/mycat.c
+	gcc -Wall -ansi -o commands/bin/mycat commands/mycat.c
 
 commands/bin:
 	mkdir -p commands/bin

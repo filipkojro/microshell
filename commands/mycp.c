@@ -9,7 +9,9 @@ int main(int argc, char **argv){
         return 1;
     }
 
+    printf("%s\n",argv[0]);
     printf("%s\n",argv[1]);
+    printf("%s\n",argv[2]);
 
     char buffer[1024];
     int bytes_read;
@@ -22,17 +24,29 @@ int main(int argc, char **argv){
 
     // printf("working dir:%s", cwd);
 
-    FILE* fptr = fopen(argv[1], "r");
-    if (fptr == NULL) {
-        perror("Could not open HTML file");
+
+    return 0;
+
+    FILE* infptr = fopen(argv[1], "r");
+
+    FILE* outfptr = fopen(argv[2], "w");
+
+
+
+    if (infptr == NULL) {
+        perror("Could not open file");
+        return 1;
+    }
+    if (outfptr == NULL) {
+        perror("Could not open 22222 file");
         return 1;
     }
 
-    while ((bytes_read = fread(buffer, 1, sizeof(buffer), fptr)) > 0) {
+    while ((bytes_read = fread(buffer, 1, sizeof(buffer), infptr)) > 0) {
         printf(buffer);
     }
 
-    fclose(fptr);
+    fclose(infptr);
 
     return 0;
 }

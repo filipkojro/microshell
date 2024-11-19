@@ -18,9 +18,10 @@ int main(int argc, char **argv){
         perror("Could not open file");
         return 1;
     }
-
-    while (fread(buffer, 1, sizeof(buffer), fptr) > 0) {
-        printf("%s", buffer);
+    int num;
+    while ((num = fread(buffer, 1, sizeof(buffer), fptr)) > 0) {
+        // printf("%s", buffer);
+        write(STDOUT_FILENO, buffer, num);
     }
 
     fclose(fptr);

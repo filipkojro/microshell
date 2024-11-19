@@ -48,7 +48,9 @@ int main(){
     printf(BLUE_TEXT"%s@%s "GREEN_TEXT"%s"RESET_TEXT" $ ", user, hostname, cwd);
     scanf("%s%[^\n]", command, arguments);
 
-    if (fork() != 0){
+    int childpid;
+
+    if ((childpid = fork()) != 0){
         // printf("rodzic?\n");
 
         int status;
@@ -73,17 +75,26 @@ int main(){
         
         char *args[argc + 2];
         args[0] = command;
-        args[argc] = NULL;
+        args[argc + 1] = NULL;
+
+
+        
+
+
 
         char ar[100];
         char* temp_args = arguments;
-        for (int i = 1; i < argc+1; i++){
+        for (int i = 0; i < argc; i++){
             if (strlen(temp_args) <= 0) break;
             sscanf(temp_args, " %s", ar);
             args[i] = ar;
 
             temp_args += sizeof(char) * (strlen(ar) + 1);
             // printf("%dnxtarg:%s\n", i, ar);
+        }
+
+        for (i = 0; i < argc + 2; i++){
+            printf("i:%d:%s\n", i, args[i]);
         }
 
         execvp(command, args);

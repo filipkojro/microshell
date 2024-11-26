@@ -1,4 +1,4 @@
-all: microshell colortest mycat mycp
+all: microshell colortest mycat mycp myls
 
 # SRCS = $(wildcard commands/*.c)
 
@@ -16,6 +16,9 @@ mycat: commands/bin | commands/mycp.c
 
 mycp: commands/bin | commands/mycat.c
 	gcc -Wall -ansi -o commands/bin/mycat commands/mycat.c
+
+myls: commands/bin | commands/myls.c
+	gcc -Wall -ansi -o commands/bin/myls commands/myls.c
 
 commands/bin:
 	mkdir -p commands/bin

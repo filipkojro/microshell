@@ -15,15 +15,6 @@ int main(int argc, char **argv){
 
     char buffer[1024];
     int bytes_read;
-    // char cwd[4096];
-
-    // if (getcwd(cwd, sizeof(cwd)) == NULL) {
-    //     printf("getcwd() error?\n");
-    //     return 1;
-    // }
-
-    // printf("working dir:%s", cwd);
-
 
     return 0;
 

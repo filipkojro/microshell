@@ -47,10 +47,12 @@ int main(){
         }
 
         printf(BLUE_TEXT"%s@%s "GREEN_TEXT"%s"RESET_TEXT" $ ", user, hostname, cwd);
+        strcpy(command, "");
+        strcpy(arguments, "");
         scanf("%s%[^\n]", command, arguments);
 
         if (strcmp(command, "exit") == 0){
-            printf("leaving\n");
+            printf("leaving :)\n");
             exit(0);
         }
 
@@ -68,12 +70,26 @@ int main(){
         }
         else {
             int argc = 0;
-
+            int last_space = 0;
             int c;
+
+            printf("arguments:%s:", arguments);
+
             for (c = 0; c < strlen(arguments); c++){
-                if (arguments[c] == ' ') argc++;
+                if (arguments[c] == ' ') {
+                    if (last_space == 1){
+                        printf(RED_TEXT"zle wpisane argumenty\n");
+                        exit(1);
+                    }
+                    argc++;
+                    last_space = 1;
+                }
+                else last_space = 0;
             }
-        
+            if (last_space == 1){
+                argc--;
+            }
+
             char args[argc + 1][1024];
             char* argv[argc + 2];
 

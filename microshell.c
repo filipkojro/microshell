@@ -35,73 +35,84 @@ int main(){
     char* user = getlogin();
     char hostname[1024];
 
-    if (gethostname(hostname, sizeof(hostname)) != 0){
-        printf(RED_TEXT"gethostname() error?\n");
-        return 1;
-    }
-
-    if (getcwd(cwd, sizeof(cwd)) == NULL) {
-        printf(RED_TEXT"getcwd() error?\n");
-        return 1;
-    }
-
-    printf(BLUE_TEXT"%s@%s "GREEN_TEXT"%s"RESET_TEXT" $ ", user, hostname, cwd);
-    scanf("%s%[^\n]", command, arguments);
-
-    int childpid;
-
-    if ((childpid = fork()) != 0){
-        // printf("rodzic?\n");
-
-        int status;
-        waitpid(-1, &status, 0);
-
-        if (status != 0){
-            printf("reteturned with status: %d\n", status);
+    while (1){
+        if (gethostname(hostname, sizeof(hostname)) != 0){
+            printf(RED_TEXT"gethostname() error?\n");
+            return 1;
         }
-    }
-    else {
-        int argc = 0;
 
-        int c;
-        for (c = 0; c < strlen(arguments); c++){
-            if (arguments[c] == ' ') argc++;
+        if (getcwd(cwd, sizeof(cwd)) == NULL) {
+            printf(RED_TEXT"getcwd() error?\n");
+            return 1;
         }
-        if (c == 0){
-            arguments[0] = ' ';
-            arguments[1] = '\0';
-            argc++;
+
+        printf(BLUE_TEXT"%s@%s "GREEN_TEXT"%s"RESET_TEXT" $ ", user, hostname, cwd);
+        scanf("%s%[^\n]", command, arguments);
+
+        if (strcmp(command, "exit") == 0){
+            printf("leaving\n");
+            exit(0);
         }
+
+        int childpid;
+
+        if ((childpid = fork()) != 0){
+            // printf("rodzic?\n");
+
+            int status;
+            waitpid(-1, &status, 0);
+
+            if (status != 0){
+                printf("eteturned with status: %d\n", status);
+            }
+        }
+        else {
+            int argc = 0;
+
+            int c;
+            for (c = 0; c < strlen(arguments); c++){
+                if (arguments[c] == ' ') argc++;
+            }
         
-        char *args[argc + 2];
-        args[0] = command;
-        args[argc + 1] = NULL;
+            char args[argc + 1][1024];
+            char* argv[argc + 2];
 
+            strcpy(args[0], command);
+            
+            char ar[1024];
+            char rest[1024];
+            char rest2[1024];
+            
+            strcpy(rest, arguments);
+            
+            int i;
+            
+            for (i = 1; i < argc + 1; i++){
+                
+                sscanf(rest, " %s%[^\0]", ar, rest2);
+                
+                strcpy(args[i], ar);
+                printf("some text\n");
+                strcpy(rest, rest2);
+            }
 
-        
+            for (i = 0; i < argc + 1; i++){
+                argv[i] = args[i];
+            }
+            argv[argc + 1] = NULL;
 
+            for (i = 0; i < argc + 2; i++){
+                printf("i:%d:%s\n", i, argv[i]);
+            }
 
+            execvp(command, argv);
 
-        char ar[100];
-        char* temp_args = arguments;
-        for (int i = 0; i < argc; i++){
-            if (strlen(temp_args) <= 0) break;
-            sscanf(temp_args, " %s", ar);
-            args[i] = ar;
+            printf(RED_TEXT"nie ma takiej komendy\n");
 
-            temp_args += sizeof(char) * (strlen(ar) + 1);
-            // printf("%dnxtarg:%s\n", i, ar);
+            return 0;
         }
-
-        for (i = 0; i < argc + 2; i++){
-            printf("i:%d:%s\n", i, args[i]);
-        }
-
-        execvp(command, args);
-
-        printf(RED_TEXT"nie ma takiej komendy\n");
-
-        return 0;
     }
+
+    
     return 0;
 }

@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <string.h>
+#include <errno.h>
 
 #define true 1
 #define false 0
@@ -25,7 +26,7 @@ char* concat(const char *s1, const char *s2) {
 }
 
 int main(){
-    setenv("PATH", concat("/Users/filip/Sync/UAM/SO/microshell/commands/bin:", getenv("PATH")), 1);
+    setenv("PATH", concat("/Users/filip/Sync/UAM/SO/microshell/commands/bin:", getenv("PATH")), 1); //zmienic dolaczony path!!!!!!!!!!!!!
     // printf("%s\n", getenv("PATH"));
 
     char command[32];
@@ -35,7 +36,7 @@ int main(){
     char* user = getlogin();
     char hostname[1024];
 
-    while (1){
+    while (1){ 
         if (gethostname(hostname, sizeof(hostname)) != 0){
             printf(RED_TEXT"gethostname() error?\n");
             return 1;
@@ -62,13 +63,14 @@ int main(){
             // printf("rodzic?\n");
 
             int status;
-            waitpid(-1, &status, 0);
+            wait(&status);
 
-            if (status != 0){
-                printf("eteturned with status: %d\n", status);
+            if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
+                printf("Error number: %d\n", WEXITSTATUS(status));
             }
         }
         else {
+            // counting arguments
             int argc = 0;
             int last_space = 0;
             int c;
@@ -102,6 +104,8 @@ int main(){
             strcpy(rest, arguments);
             
             int i;
+
+            //inserting argument to vector
             
             for (i = 1; i < argc + 1; i++){
                 
@@ -122,8 +126,8 @@ int main(){
             }
 
             execvp(command, argv);
-
             printf(RED_TEXT"nie ma takiej komendy\n");
+            _exit(errno);
 
             return 0;
         }

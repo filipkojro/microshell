@@ -1,9 +1,12 @@
-all: microshell colortest mycat mycp myls
+all: microshell colortest mycat mycp myls test
 
 # SRCS = $(wildcard commands/*.c)
 
 # test: $(SRCS)
 # 	echo $(SRCS)
+
+test: commands/bin | commands/test.c
+	gcc -Wall -ansi -o commands/bin/test commands/test.c
 
 microshell: microshell.c
 	gcc -Wall -ansi -o microshell microshell.c

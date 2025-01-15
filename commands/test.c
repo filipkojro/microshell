@@ -1,27 +1,9 @@
 #include <stdio.h>
 
-int main()
+int main(void)
 {
-	char ch;
-	//infinite loop
-	while(1)
-	{
-		printf("Enter any character: ");
-		//read a single character
-		ch=fgetc(stdin);
-		
-		if(ch==0x0A)
-		{
-			printf("ENTER KEY is pressed.\n");
-			break;
-		}
-		else
-		{
-			printf("%c is pressed.\n",ch);
-		}
-		//read dummy character to clear
-		//input buffer, which inserts after character input
-		ch=getchar();
-	}
-	return 0;
+    // output may depend upon the compiler
+    printf("My mobile number "
+           "is 7\a8\a7\a3\a9\a2\a3\a4\a0\a8\a");
+    return (0);
 }

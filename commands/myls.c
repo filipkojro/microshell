@@ -30,12 +30,12 @@ int main(int argc, char **argv) {
     }
     int as_list_flag = 0;
     int all_flag = 0;
-    printf("%s\n", directory);
+    // printf("%s\n", directory);
 
     // handling arguments
 
     for (int i = 1; i < argc; i++){
-        printf("%d:%s\n", i, argv[i]);
+        // printf("%d:%s\n", i, argv[i]);
 
         if (strcmp(argv[i], "-l") == 0) {
             as_list_flag = 1;
@@ -48,28 +48,25 @@ int main(int argc, char **argv) {
         strcpy(directory, argv[i]);
     }
 
-    printf("what is my directory: %s\n\n\n", directory);
+    // printf("what is my directory: %s\n\n\n", directory);
 
     char next_directory[1024];
 
     if ((dir = opendir(directory)) == NULL) perror("Error opendir() function");
     else {
-        printf("Content of %s directory:\n", directory);
+        // printf("Content of %s directory:\n", directory);
 
         while ((entry = readdir(dir)) != NULL) {
             strcpy(next_directory, entry->d_name);
 
             if (next_directory[0] != '.' || all_flag == 1){
                 if (as_list_flag == 0){
-                    printf("  %s", next_directory);
+                    printf("%s\t", next_directory);
                 }
                 if (as_list_flag == 1){
                     printf("%s\n", next_directory);
                 }
             }
-
-            
-            
         }
         closedir(dir);
         if (as_list_flag == 0) printf("\n");

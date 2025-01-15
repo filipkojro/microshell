@@ -25,10 +25,27 @@ char* concat(const char *s1, const char *s2) {
     return result;
 }
 
+int mycd(int argc, char **argv){
+    printf("%s\n", argv[0]);
+    printf("%s\n", argv[1]);
+
+    char* direcotry = getenv("HOME");
+
+    if (argc != 0){
+        direcotry = argv[1];
+    }
+    if (chdir(direcotry) != 0){
+        printf("problem with chdir\n");
+        return 1;
+    }
+    return 0;
+}
+
 int main(){
     setenv("PATH", concat("/Users/filip/Sync/UAM/SO/microshell/commands/bin:", getenv("PATH")), 1); //zmienic dolaczony path!!!!!!!!!!!!!
-    // printf("%s\n", getenv("PATH"));
+    // printf("%s\n", getenv("HOME"));
 
+    char inp[4096];
     char command[32];
     char arguments[1024];
 
@@ -47,14 +64,78 @@ int main(){
             return 1;
         }
 
-        printf(BLUE_TEXT"%s@%s "GREEN_TEXT"%s"RESET_TEXT" $ ", user, hostname, cwd);
+        printf(BLUE_TEXT"(microshell)%s@%s "GREEN_TEXT"%s"RESET_TEXT" $ ", user, hostname, cwd);
         strcpy(command, "");
         strcpy(arguments, "");
-        scanf("%s%[^\n]", command, arguments);
+
+        fgets(inp, 4096, stdin);
+        sscanf(inp, "%s%[^\n]", command, arguments);
+
+        // counting arguments
+        int argc = 0;
+        int last_space = 0;
+        int c;
+
+        // printf("arguments:%s:", arguments);
+
+        for (c = 0; c < strlen(arguments); c++){
+            if (arguments[c] == ' ') {
+                if (last_space == 1){
+                    printf(RED_TEXT"zle wpisane argumenty\n");
+                    exit(1);
+                }
+                argc++;
+                last_space = 1;
+            }
+            else last_space = 0;
+        }
+        if (last_space == 1){
+            argc--;
+        }
+
+        char args[argc + 1][1024];
+        char* argv[argc + 2];
+
+        strcpy(args[0], command);
+        
+        char ar[1024];
+        char rest[1024];
+        char rest2[1024];
+        
+        strcpy(rest, arguments);
+        
+        int i;
+
+        //inserting argument to vector
+        
+        for (i = 1; i < argc + 1; i++){
+            
+            sscanf(rest, " %s%[^\0]", ar, rest2);
+            
+            strcpy(args[i], ar);
+            // printf("some text\n");
+            strcpy(rest, rest2);
+        }
+
+        for (i = 0; i < argc + 1; i++){
+            argv[i] = args[i];
+        }
+        argv[argc + 1] = NULL;
+
+        // for (i = 0; i < argc + 2; i++){
+        //     printf("i:%d:%s\n", i, argv[i]);
+        // }
 
         if (strcmp(command, "exit") == 0){
             printf("leaving :)\n");
             exit(0);
+        }
+        else if (strcmp(command, "mycd") == 0){
+            if (mycd(argc, argv) != 0){
+                printf("proglem with mycd\n");
+            }
+            continue;
+            
         }
 
         int childpid;
@@ -70,60 +151,7 @@ int main(){
             }
         }
         else {
-            // counting arguments
-            int argc = 0;
-            int last_space = 0;
-            int c;
-
-            printf("arguments:%s:", arguments);
-
-            for (c = 0; c < strlen(arguments); c++){
-                if (arguments[c] == ' ') {
-                    if (last_space == 1){
-                        printf(RED_TEXT"zle wpisane argumenty\n");
-                        exit(1);
-                    }
-                    argc++;
-                    last_space = 1;
-                }
-                else last_space = 0;
-            }
-            if (last_space == 1){
-                argc--;
-            }
-
-            char args[argc + 1][1024];
-            char* argv[argc + 2];
-
-            strcpy(args[0], command);
             
-            char ar[1024];
-            char rest[1024];
-            char rest2[1024];
-            
-            strcpy(rest, arguments);
-            
-            int i;
-
-            //inserting argument to vector
-            
-            for (i = 1; i < argc + 1; i++){
-                
-                sscanf(rest, " %s%[^\0]", ar, rest2);
-                
-                strcpy(args[i], ar);
-                printf("some text\n");
-                strcpy(rest, rest2);
-            }
-
-            for (i = 0; i < argc + 1; i++){
-                argv[i] = args[i];
-            }
-            argv[argc + 1] = NULL;
-
-            for (i = 0; i < argc + 2; i++){
-                printf("i:%d:%s\n", i, argv[i]);
-            }
 
             execvp(command, argv);
             printf(RED_TEXT"nie ma takiej komendy\n");

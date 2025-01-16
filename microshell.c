@@ -12,12 +12,12 @@
 #define false 0
 
 // colors using ANSI escape code \033[1;{color code}m
-#define BLINK "\033[5m"
-#define RED_TEXT "\033[1;31m"
-#define GREEN_TEXT "\033[1;32m"
-#define BLUE_TEXT "\033[1;34m"
-#define RESET_TEXT "\033[1;0m"
-
+#define BLINK "\001\033[5m\002"
+#define RED_TEXT "\001\033[1;31m\002"
+#define GREEN_TEXT "\001\033[1;32m\002"
+#define BLUE_TEXT "\001\033[1;34m\002"
+#define RESET_TEXT "\001\033[1;0m\002"
+int sigint2;
 char* concat(const char *s1, const char *s2) {
     const size_t len1 = strlen(s1);
     const size_t len2 = strlen(s2);
@@ -43,56 +43,84 @@ int mycd(int argc, char **argv){
     return 0;
 }
 
-int main(){
-    setenv("PATH", concat("/Users/filip/Sync/UAM/SO/microshell/commands/bin:", getenv("PATH")), 1); //zmienic dolaczony path!!!!!!!!!!!!!
-    // printf("%s\n", getenv("HOME"));
-
-    char inp[4096];
-    char command[32];
-    char arguments[1024];
-
+int gen_prompt(char* prompt){
     char cwd[4096];
     char* user = getlogin();
     char hostname[1024];
 
+    if (gethostname(hostname, sizeof(hostname)) != 0){
+        printf(RED_TEXT"gethostname() error?\n");
+        return 1;
+    }
+
+    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+        printf(RED_TEXT"getcwd() error?\n");
+        return 1;
+    }
+    sprintf(prompt, RESET_TEXT"(microshell)"BLUE_TEXT"%s@%s "GREEN_TEXT"%s"RESET_TEXT" $ ", user, hostname, cwd);
+    return 0;
+}
+
+void handle_sigint(int sig) {
+    if(sigint2){
+        return;
+    }
+    else{
+        char prompt[8192];
+        gen_prompt(prompt);
+        printf("\n%s", prompt);
+    }
+}
+
+int main(){
+    signal(SIGINT, handle_sigint);
+    setenv("PATH", concat("/Users/filip/Sync/UAM/SO/microshell/commands/bin:", getenv("PATH")), 1); //zmienic dolaczony path!!!!!!!!!!!!!
+    // printf("%s\n", getenv("HOME"));
+
+    char* inp;
+    char command[32];
+    char arguments[1024];
+
+    char prompt[8192];
+
     while (1){ 
-        if (gethostname(hostname, sizeof(hostname)) != 0){
-            printf(RED_TEXT"gethostname() error?\n");
-            return 1;
-        }
-
-        if (getcwd(cwd, sizeof(cwd)) == NULL) {
-            printf(RED_TEXT"getcwd() error?\n");
-            return 1;
-        }
-
-        printf(BLUE_TEXT"(microshell)%s@%s "GREEN_TEXT"%s"RESET_TEXT" $ ", user, hostname, cwd);
+        
         strcpy(command, "");
         strcpy(arguments, "");
 
-        fgets(inp, 4096, stdin);
+        // fgets(inp, 4096, stdin);
+        if(gen_prompt(prompt) == 1){
+            exit(1);
+        }
+        sigint2 = 0;
+        inp = readline(prompt);
+        sigint2 = 1;
+
+        add_history(inp);
+
         sscanf(inp, "%s%[^\n]", command, arguments);
 
         // counting arguments
         int argc = 0;
         int last_space = 0;
         int c;
-
+        int argument_problem = 0;
         // printf("arguments:%s:", arguments);
 
         for (c = 0; c < strlen(arguments); c++){
             if (arguments[c] == ' ') {
-                if (last_space == 1){
-                    printf(RED_TEXT"zle wpisane argumenty\n");
-                    exit(1);
+                if (last_space != 1){
+                    argc++;
+                    last_space = 1;
                 }
-                argc++;
-                last_space = 1;
             }
             else last_space = 0;
         }
         if (last_space == 1){
             argc--;
+        }
+        if (argument_problem == 1){
+            continue;
         }
 
         char args[argc + 1][1024];
@@ -153,7 +181,7 @@ int main(){
             }
         }
         else {
-            
+            signal(SIGINT, SIG_DFL);
 
             execvp(command, argv);
             printf(RED_TEXT"nie ma takiej komendy\n");

@@ -25,6 +25,7 @@ int main() {
             add_history(input); // Add command to history
         }
 
+
         // Check if the user wants to see the history
         if (strcmp(input, "history") == 0) {
             print_history(); // Print the history

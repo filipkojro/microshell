@@ -10,7 +10,7 @@ some_file:
 	echo "Look at this variable: " $(files)
 
 test: commands/test.c
-	gcc -Wall -o commands/bin/test commands/test.c
+	gcc -Wall -o commands/bin/test commands/test.c -I /opt/homebrew/opt/readline/include -L /opt/homebrew/opt/readline/lib -lreadline
 
 microshell: microshell.c
 	gcc -Wall -o microshell microshell.c

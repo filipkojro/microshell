@@ -44,6 +44,7 @@ int mycd(int argc, char **argv){
 }
 
 int gen_prompt(char* prompt){
+    char whole_cwd[4096];
     char cwd[4096];
     char* user = getlogin();
     char hostname[1024];
@@ -53,11 +54,34 @@ int gen_prompt(char* prompt){
         return 1;
     }
 
-    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+    if (getcwd(whole_cwd, sizeof(whole_cwd)) == NULL) {
         printf(RED_TEXT"getcwd() error?\n");
         return 1;
     }
-    sprintf(prompt, RESET_TEXT"(microshell)"BLUE_TEXT"%s@%s "GREEN_TEXT"%s"RESET_TEXT" $ ", user, hostname, cwd);
+
+    char* home_dir;
+    if ((home_dir = getenv("HOME")) == NULL){
+        printf(RED_TEXT"HOME error?\n");
+        return 1;
+    }
+
+    char possible_home[4096];
+
+    if (strlen(home_dir) <= strlen(whole_cwd)){
+        strncpy(possible_home, whole_cwd, strlen(home_dir));
+
+        if (strcmp(possible_home, home_dir) == 0){
+            strcpy(cwd, concat("~", whole_cwd + strlen(home_dir)));
+        }
+        else {
+            strcpy(cwd, whole_cwd);
+        }
+    }
+    else {
+        strcpy(cwd, whole_cwd);
+    }
+
+    snprintf(prompt, 4096, RESET_TEXT"!microshell!"BLUE_TEXT"%s@%s "GREEN_TEXT"%s"RESET_TEXT" $ ", user, hostname, cwd);
     return 0;
 }
 

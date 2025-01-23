@@ -1,15 +1,6 @@
-flags = -I /opt/homebrew/opt/readline/include -L /opt/homebrew/opt/readline/lib -lreadline -Wall
+flags = -Wall
 
 all: microshell commands/bin colortest mycat mycp myls test
-
-# SRCS = $(wildcard commands/*.c)
-
-# test: $(SRCS)
-# 	echo $(SRCS)
-
-files := file1 file2
-some_file:
-	echo "Look at this variable: " $(files)
 
 test: commands/test.c
 	gcc -o commands/bin/test commands/test.c $(flags)
@@ -35,13 +26,3 @@ commands/bin:
 clean:
 	rm -f *.o microshell
 	rm -rf commands/bin
-
-
-
-# SRC=$(wildcard *.c)
-# EXEC=$(SRC:.c=)
-
-# all: $(EXEC)
-
-# %: %.c
-#     gcc -o $@ $<

@@ -25,22 +25,6 @@ char* concat(const char *s1, const char *s2) {
     return result;
 }
 
-int mycd(int argc, char **argv){
-    printf("%s\n", argv[0]);
-    printf("%s\n", argv[1]);
-
-    char* direcotry = getenv("HOME");
-
-    if (argc != 0){
-        direcotry = argv[1];
-    }
-    if (chdir(direcotry) != 0){
-        printf("problem with chdir\n");
-        return 1;
-    }
-    return 0;
-}
-
 int gen_prompt(char* prompt){
     char whole_cwd[4096];
     char cwd[4096];
@@ -94,16 +78,41 @@ void handle_sigint(int sig) {
     }
 }
 
+int mycd(int argc, char **argv){
+    printf("%s\n", argv[0]);
+    printf("%s\n", argv[1]);
+
+    char* direcotry = getenv("HOME");
+
+    if (argc != 0){
+        direcotry = argv[1];
+    }
+    if (chdir(direcotry) != 0){
+        printf("problem with chdir\n");
+        return 1;
+    }
+    return 0;
+}
+
 int main(){
     signal(SIGINT, handle_sigint);
-    setenv("PATH", concat("/Users/filip/Sync/UAM/SO/microshell/commands/bin:", getenv("PATH")), 1); //zmienic dolaczony path!!!!!!!!!!!!!
-    // printf("%s\n", getenv("HOME"));
+
+    char cwd[4096];
+    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+        printf(RED_TEXT"getcwd() error?\n");
+        return 1;
+    }
+    setenv("PATH", concat(concat(cwd, "commands/bin:"), getenv("PATH")), 1);
+
+    printf("%s", concat(cwd, "commands/bin:"));
 
     char* inp;
     char command[32];
     char arguments[1024];
 
     char prompt[8192];
+
+    return 0;
 
     while (1){ 
         
@@ -115,10 +124,10 @@ int main(){
             exit(1);
         }
         sigint2 = 0;
-        inp = readline(prompt);
+        // inp = readline(prompt);
         sigint2 = 1;
 
-        add_history(inp);
+        // add_history(inp);
 
         sscanf(inp, "%s%[^\n]", command, arguments);
 

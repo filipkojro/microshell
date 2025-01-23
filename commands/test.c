@@ -6,7 +6,7 @@
 #include <sys/ioctl.h>
 
 #define MAX_HISTORY 100
-#define MAX_CMD_LEN 1024
+#define MAX_CMD_LEN 10
 
 char *history[MAX_HISTORY];
 int history_count = 0;
@@ -63,7 +63,7 @@ void show_command(char* prompt, const char *cmd) {
 
 // Handle input with history navigation
 void handle_input() {
-    char cmd[MAX_CMD_LEN] = {0};
+    char cmd[MAX_CMD_LEN + 1] = {0};
     int cmd_len = 0;
     char c;
 
@@ -113,6 +113,12 @@ void handle_input() {
                             fflush(stdout);
                             cmd_len = 0;
                         }
+                    } else if (seq[1] == 'C') { // Right arrow
+                        printf("Right?");
+                        return;
+                    } else if (seq[1] == 'D') { // Left arrow
+                        printf("LEFT?");
+                        return;
                     }
                 }
             }
@@ -123,8 +129,10 @@ void handle_input() {
                 show_command(prompt, cmd);
             }
         } else { // Regular characters
-            cmd[cmd_len++] = c;
-            write(STDOUT_FILENO, &c, 1);
+            if (cmd_len < MAX_CMD_LEN){
+                cmd[cmd_len++] = c;
+                write(STDOUT_FILENO, &c, 1);
+            }
         }
     }
 

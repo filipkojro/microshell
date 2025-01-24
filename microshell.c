@@ -102,9 +102,9 @@ int main(){
         printf(RED_TEXT"getcwd() error?\n");
         return 1;
     }
-    setenv("PATH", concat(concat(cwd, "commands/bin:"), getenv("PATH")), 1);
+    setenv("PATH", concat(concat(cwd, "/commands/bin:"), getenv("PATH")), 1);
 
-    printf("%s", concat(cwd, "commands/bin:"));
+    printf("%s", concat(cwd, "/commands/bin:"));
 
     char* inp;
     char command[32];

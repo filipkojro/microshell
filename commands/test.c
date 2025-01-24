@@ -6,7 +6,7 @@
 #include <sys/ioctl.h>
 
 #define MAX_HISTORY 100
-#define MAX_CMD_LEN 10
+#define MAX_CMD_LEN 1024
 
 char *history[MAX_HISTORY];
 int history_count = 0;
@@ -26,6 +26,28 @@ void disable_raw_mode() {
     tcgetattr(STDIN_FILENO, &term);
     term.c_lflag |= (ICANON | ECHO); // Re-enable canonical mode and echo
     tcsetattr(STDIN_FILENO, TCSANOW, &term);
+}
+
+void insert_inside(char* cmd, int* pos, int* len, char c){
+    char* temp = malloc(*len);
+    memcpy(temp, cmd, *len);
+    cmd[*pos] = c;
+    memcpy(cmd + *pos + 1, temp + *pos, *len - *pos);
+
+    (*pos)++;
+    (*len)++;
+    free(temp);
+}
+
+void delete_inside(char* cmd, int* pos, int* len){
+    char* temp = malloc(*len);
+    memcpy(temp, cmd, *len);
+    memcpy(cmd + *pos - 1, temp + *pos, *len - *pos);
+
+    (*pos)--;
+    (*len)--;
+    free(temp);
+    cmd[*len] = '\0';
 }
 
 // Add command to history
@@ -65,6 +87,7 @@ void show_command(char* prompt, const char *cmd) {
 void handle_input() {
     char cmd[MAX_CMD_LEN + 1] = {0};
     int cmd_len = 0;
+    int cmd_cur = 0;
     char c;
 
     char* prompt = "> ";
@@ -140,6 +163,27 @@ void handle_input() {
 }
 
 int main() {
-    handle_input();
+    char cmd[1024] = {0};
+    cmd[0] = 'H';
+    cmd[1] = 'E';
+    cmd[2] = 'L';
+    cmd[3] = 'P';
+    int pos = 3;
+    int len = 4;
+    char c = 'B';
+    for (int i = 0; i < 10; i++){printf("%c", cmd[i]);}
+    printf("%d %d\n", pos, len);
+    insert_inside(cmd, &pos, &len, c);
+    for (int i = 0; i < 10; i++){printf("%c", cmd[i]);}
+    printf("%d %d\n", pos, len);
+    insert_inside(cmd, &pos, &len, c);
+    for (int i = 0; i < 10; i++){printf("%c", cmd[i]);}
+    printf("%d %d\n", pos, len);
+    pos = 2;
+
+    delete_inside(cmd, &pos, &len);
+    for (int i = 0; i < 10; i++){printf("%c", cmd[i]);}
+    printf("%d %d\n", pos, len);
+    // handle_input();
     return 0;
 }

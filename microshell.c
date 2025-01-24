@@ -16,6 +16,9 @@
 #define BLUE_TEXT "\001\033[1;34m\002"
 #define RESET_TEXT "\001\033[1;0m\002"
 int sigint2;
+
+
+
 char* concat(const char *s1, const char *s2) {
     const size_t len1 = strlen(s1);
     const size_t len2 = strlen(s2);

@@ -105,9 +105,10 @@ void handle_input() {
                 printf("You entered: %s\n", cmd);
             }
             cmd_len = 0;
+            cmd_cur = cmd_len;
             memset(cmd, 0, sizeof(cmd));
             // printf(">\n");
-            write(STDOUT_FILENO, "> ", sizeof("> "));
+            write(STDOUT_FILENO, prompt, strlen(prompt));
             fflush(stdout);
         } else if (c == 27) { // Arrow keys
             char seq[2];
@@ -120,6 +121,7 @@ void handle_input() {
                             show_command(prompt, history[history_index]);
                             strcpy(cmd, history[history_index]);
                             cmd_len = strlen(cmd);
+                            cmd_cur = cmd_len;
                         }
                     } else if (seq[1] == 'B') { // Down arrow
                         if (history_index < history_count - 1) {
@@ -128,6 +130,7 @@ void handle_input() {
                             show_command(prompt, history[history_index]);
                             strcpy(cmd, history[history_index]);
                             cmd_len = strlen(cmd);
+                            cmd_cur = cmd_len;
                         } else if (history_index == history_count - 1) {
                             history_index++;
                             clear_input(prompt, cmd);
@@ -135,26 +138,46 @@ void handle_input() {
                             write(STDOUT_FILENO, "> ", sizeof("> "));
                             fflush(stdout);
                             cmd_len = 0;
+                            cmd_cur = cmd_len;
                         }
                     } else if (seq[1] == 'C') { // Right arrow
-                        printf("Right?");
-                        return;
+                        if (cmd_cur < cmd_len) {
+                            cmd_cur++; // Move logical cursor right
+                            clear_input(prompt, cmd);
+                            show_command(prompt, cmd);
+
+                            // Move terminal cursor
+                            printf("\033[%dG", (int)(strlen(prompt) + cmd_cur + 1));
+                            fflush(stdout);
+                        }
                     } else if (seq[1] == 'D') { // Left arrow
-                        printf("LEFT?");
-                        return;
+                        if (cmd_cur > 0) {
+                            cmd_cur--; // Move logical cursor left
+                            clear_input(prompt, cmd);
+                            show_command(prompt, cmd);
+
+                            // Move terminal cursor to the correct position
+                            printf("\033[%dG", (int)(strlen(prompt) + cmd_cur + 1));
+                            fflush(stdout);
+                        }
                     }
                 }
             }
         } else if (c == 127) { // Backspace
-            if (cmd_len > 0) {
-                cmd[--cmd_len] = '\0';
+            if (cmd_len > 0 && cmd_cur > 0) {
+                delete_inside(cmd, &cmd_cur, &cmd_len);
                 clear_input(prompt, cmd);
                 show_command(prompt, cmd);
+                printf("\033[%dG", (int)(strlen(prompt) + cmd_cur + 1));
+                fflush(stdout);
             }
         } else { // Regular characters
             if (cmd_len < MAX_CMD_LEN){
-                cmd[cmd_len++] = c;
-                write(STDOUT_FILENO, &c, 1);
+                insert_inside(cmd, &cmd_cur, &cmd_len, c);
+                clear_input(prompt, cmd);
+                show_command(prompt, cmd);
+                printf("\033[%dG", (int)(strlen(prompt) + cmd_cur + 1));
+                fflush(stdout);
             }
         }
     }
@@ -163,27 +186,27 @@ void handle_input() {
 }
 
 int main() {
-    char cmd[1024] = {0};
-    cmd[0] = 'H';
-    cmd[1] = 'E';
-    cmd[2] = 'L';
-    cmd[3] = 'P';
-    int pos = 3;
-    int len = 4;
-    char c = 'B';
-    for (int i = 0; i < 10; i++){printf("%c", cmd[i]);}
-    printf("%d %d\n", pos, len);
-    insert_inside(cmd, &pos, &len, c);
-    for (int i = 0; i < 10; i++){printf("%c", cmd[i]);}
-    printf("%d %d\n", pos, len);
-    insert_inside(cmd, &pos, &len, c);
-    for (int i = 0; i < 10; i++){printf("%c", cmd[i]);}
-    printf("%d %d\n", pos, len);
-    pos = 2;
+    // char cmd[1024] = {0};
+    // cmd[0] = 'H';
+    // cmd[1] = 'E';
+    // cmd[2] = 'L';
+    // cmd[3] = 'P';
+    // int pos = 3;
+    // int len = 4;
+    // char c = 'B';
+    // for (int i = 0; i < 10; i++){printf("%c", cmd[i]);}
+    // printf("%d %d\n", pos, len);
+    // insert_inside(cmd, &pos, &len, c);
+    // for (int i = 0; i < 10; i++){printf("%c", cmd[i]);}
+    // printf("%d %d\n", pos, len);
+    // insert_inside(cmd, &pos, &len, c);
+    // for (int i = 0; i < 10; i++){printf("%c", cmd[i]);}
+    // printf("%d %d\n", pos, len);
+    // pos = 2;
 
-    delete_inside(cmd, &pos, &len);
-    for (int i = 0; i < 10; i++){printf("%c", cmd[i]);}
-    printf("%d %d\n", pos, len);
-    // handle_input();
+    // delete_inside(cmd, &pos, &len);
+    // for (int i = 0; i < 10; i++){printf("%c", cmd[i]);}
+    // printf("%d %d\n", pos, len);
+    handle_input();
     return 0;
 }

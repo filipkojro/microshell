@@ -58,14 +58,15 @@ void add_to_history(const char *cmd) {
     history_index = history_count; // Reset index
 }
 
+int terminal_width(){
+    struct winsize w;
+    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1) {return 80;}
+    else {return w.ws_col;}
+}
+
 // Clear input
 void clear_input(char* prompt, const char *cmd) {
-    int term_width;
-    struct winsize w;
-    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1) {term_width = 80;}
-    else {term_width = w.ws_col;}
-    
-    int cmd_lines = (strlen(cmd) + strlen(prompt)) / term_width + 1; // "+2" for "> " prompt
+    int cmd_lines = (strlen(cmd) + strlen(prompt)) / terminal_width() + 1; // "+2" for "> " prompt
     for (int i = 0; i < cmd_lines; i++) {
         printf("\33[2K\r"); // Clear the current line
         if (i < cmd_lines - 1) {
@@ -147,7 +148,7 @@ void handle_input() {
                             show_command(prompt, cmd);
 
                             // Move terminal cursor
-                            printf("\033[%dG", (int)(strlen(prompt) + cmd_cur + 1));
+                            printf("\033[%dG", (int)(strlen(prompt) + cmd_cur + 1) % terminal_width());
                             fflush(stdout);
                         }
                     } else if (seq[1] == 'D') { // Left arrow
@@ -157,7 +158,7 @@ void handle_input() {
                             show_command(prompt, cmd);
 
                             // Move terminal cursor to the correct position
-                            printf("\033[%dG", (int)(strlen(prompt) + cmd_cur + 1));
+                            printf("\033[%dG", (int)(strlen(prompt) + cmd_cur + 1) % terminal_width());
                             fflush(stdout);
                         }
                     }
@@ -165,18 +166,18 @@ void handle_input() {
             }
         } else if (c == 127) { // Backspace
             if (cmd_len > 0 && cmd_cur > 0) {
-                delete_inside(cmd, &cmd_cur, &cmd_len);
                 clear_input(prompt, cmd);
+                delete_inside(cmd, &cmd_cur, &cmd_len);
                 show_command(prompt, cmd);
-                printf("\033[%dG", (int)(strlen(prompt) + cmd_cur + 1));
+                printf("\033[%dG", (int)(strlen(prompt) + cmd_cur + 1) % terminal_width());
                 fflush(stdout);
             }
         } else { // Regular characters
             if (cmd_len < MAX_CMD_LEN){
-                insert_inside(cmd, &cmd_cur, &cmd_len, c);
                 clear_input(prompt, cmd);
+                insert_inside(cmd, &cmd_cur, &cmd_len, c);
                 show_command(prompt, cmd);
-                printf("\033[%dG", (int)(strlen(prompt) + cmd_cur + 1));
+                printf("\033[%dG", (int)(strlen(prompt) + cmd_cur + 1) % terminal_width());
                 fflush(stdout);
             }
         }

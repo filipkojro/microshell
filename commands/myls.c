@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
     // handling arguments
 
     for (int i = 1; i < argc; i++){
-        // printf("%d:%s\n", i, argv[i]);
+        printf("%d:%s\n", i, argv[i]);
 
         if (strcmp(argv[i], "-l") == 0) {
             as_list_flag = 1;

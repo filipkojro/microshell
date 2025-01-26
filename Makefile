@@ -1,6 +1,6 @@
 flags = -Wall
 
-all: microshell commands/bin colortest mycat mycp myls test
+all: microshell commands/bin colortest mycat mycp myls myhelp test
 
 test: commands/test.c
 	gcc -o commands/bin/test commands/test.c $(flags)
@@ -19,6 +19,9 @@ mycp: commands/mycat.c
 
 myls: commands/myls.c
 	gcc -o commands/bin/myls commands/myls.c $(flags)
+
+myhelp: commands/myhelp.c
+	gcc -o commands/bin/myhelp commands/myhelp.c $(flags)
 
 commands/bin:
 	mkdir -p commands/bin

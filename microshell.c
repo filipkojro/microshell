@@ -156,6 +156,7 @@ int gen_prompt(char* prompt){
 }
 
 void handle_sigint(int sig) {
+    printf("^C\n");
     return;
 }
 
@@ -268,6 +269,8 @@ int main(){
 
             if (strcmp(command, "exit") == 0){
                 printf("leaving :)\n");
+                signal(SIGINT, SIG_DFL);
+                disable_raw_mode();
                 exit(0);
             }
             else if (strcmp(command, "mycd") == 0){

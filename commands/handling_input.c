@@ -28,6 +28,7 @@ void disable_raw_mode() {
     tcsetattr(STDIN_FILENO, TCSANOW, &term);
 }
 
+// Insert char inside string on position
 void insert_inside(char* cmd, int* pos, int* len, char c){
     char* temp = malloc(*len);
     memcpy(temp, cmd, *len);
@@ -39,6 +40,7 @@ void insert_inside(char* cmd, int* pos, int* len, char c){
     free(temp);
 }
 
+// Delete char inside string on position
 void delete_inside(char* cmd, int* pos, int* len){
     char* temp = malloc(*len);
     memcpy(temp, cmd, *len);
@@ -58,22 +60,23 @@ void add_to_history(const char *cmd) {
     history_index = history_count; // Reset index
 }
 
+int terminal_width(){
+    struct winsize w;
+    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1) {return 80;}
+    else {return w.ws_col;}
+}
+
 // Clear input
 void clear_input(char* prompt, const char *cmd) {
-    int term_width;
-    struct winsize w;
-    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1) {term_width = 80;}
-    else {term_width = w.ws_col;}
-    
-    int cmd_lines = (strlen(cmd) + strlen(prompt)) / term_width + 1; // "+2" for "> " prompt
+    int cmd_lines = (strlen(cmd) + strlen(prompt) - 1) / terminal_width() + 1; // "+2" for "> " prompt
     for (int i = 0; i < cmd_lines; i++) {
-        printf("\33[2K\r"); // Clear the current line
+        printf("\001\33[2K\r\002"); // Clear the current line
         if (i < cmd_lines - 1) {
-            printf("\033[A"); // Move cursor up
+            printf("\001\033[A\002"); // Move cursor up
         }
     }
     fflush(stdout);
-    // printf("cleard %d lines", cmd_lines);
+
 }
 
 // Show a command on the current line
@@ -81,6 +84,13 @@ void show_command(char* prompt, const char *cmd) {
     // clear_input(cmd);
     printf("%s%s", prompt, cmd);
     fflush(stdout);
+}
+
+// Move terminal cursor to the correct position
+void move_cursor(const char* cmd, char* prompt, int* pos, int move){
+    printf("\001\033[%dG\001", (int)(strlen(prompt) + *pos + 1) % terminal_width());
+    fflush(stdout);
+
 }
 
 // Handle input with history navigation
@@ -100,10 +110,16 @@ void handle_input() {
         if (c == '\n') { // Enter key
             cmd[cmd_len] = '\0';
             printf("\n");
+
+
+            // Code logic after everyting is inserted
             if (cmd_len > 0) {
                 add_to_history(cmd);
                 printf("You entered: %s\n", cmd);
             }
+
+
+
             cmd_len = 0;
             cmd_cur = cmd_len;
             memset(cmd, 0, sizeof(cmd));
@@ -147,8 +163,7 @@ void handle_input() {
                             show_command(prompt, cmd);
 
                             // Move terminal cursor
-                            printf("\033[%dG", (int)(strlen(prompt) + cmd_cur + 1));
-                            fflush(stdout);
+                            move_cursor(cmd, prompt, &cmd_cur, 1);
                         }
                     } else if (seq[1] == 'D') { // Left arrow
                         if (cmd_cur > 0) {
@@ -156,28 +171,25 @@ void handle_input() {
                             clear_input(prompt, cmd);
                             show_command(prompt, cmd);
 
-                            // Move terminal cursor to the correct position
-                            printf("\033[%dG", (int)(strlen(prompt) + cmd_cur + 1));
-                            fflush(stdout);
+                            
+                            move_cursor(cmd, prompt, &cmd_cur, -1);
                         }
                     }
                 }
             }
         } else if (c == 127) { // Backspace
             if (cmd_len > 0 && cmd_cur > 0) {
-                delete_inside(cmd, &cmd_cur, &cmd_len);
                 clear_input(prompt, cmd);
+                delete_inside(cmd, &cmd_cur, &cmd_len);
                 show_command(prompt, cmd);
-                printf("\033[%dG", (int)(strlen(prompt) + cmd_cur + 1));
-                fflush(stdout);
+                move_cursor(cmd, prompt, &cmd_cur, -1);
             }
         } else { // Regular characters
             if (cmd_len < MAX_CMD_LEN){
-                insert_inside(cmd, &cmd_cur, &cmd_len, c);
                 clear_input(prompt, cmd);
+                insert_inside(cmd, &cmd_cur, &cmd_len, c);
                 show_command(prompt, cmd);
-                printf("\033[%dG", (int)(strlen(prompt) + cmd_cur + 1));
-                fflush(stdout);
+                move_cursor(cmd, prompt, &cmd_cur, 1);
             }
         }
     }
@@ -186,27 +198,6 @@ void handle_input() {
 }
 
 int main() {
-    // char cmd[1024] = {0};
-    // cmd[0] = 'H';
-    // cmd[1] = 'E';
-    // cmd[2] = 'L';
-    // cmd[3] = 'P';
-    // int pos = 3;
-    // int len = 4;
-    // char c = 'B';
-    // for (int i = 0; i < 10; i++){printf("%c", cmd[i]);}
-    // printf("%d %d\n", pos, len);
-    // insert_inside(cmd, &pos, &len, c);
-    // for (int i = 0; i < 10; i++){printf("%c", cmd[i]);}
-    // printf("%d %d\n", pos, len);
-    // insert_inside(cmd, &pos, &len, c);
-    // for (int i = 0; i < 10; i++){printf("%c", cmd[i]);}
-    // printf("%d %d\n", pos, len);
-    // pos = 2;
-
-    // delete_inside(cmd, &pos, &len);
-    // for (int i = 0; i < 10; i++){printf("%c", cmd[i]);}
-    // printf("%d %d\n", pos, len);
     handle_input();
     return 0;
 }

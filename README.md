@@ -1,18 +1,25 @@
 # microshell
 
-## todo
-- PATH dont change for everyone
-- config file for PATH etc.
-- ctrC line problem
+## Run / build
 
-### running (linux / mac)
-u need `gcc`, `make` and `readline` library to C [(mac)](https://formulae.brew.sh/formula/readline#default)
-
-while running the first time you probably should use commands below so config will generate correctly
+### Building (linux / mac)
+u need `gcc`, `make`
 ```sh
-cd /your/designated/location/for/microshell
 git clone https://github.com/filipkojro/microshell.git
 cd microshell
 make
+```
+
+### running (linux / mac)
+While running you have to be in microshell directory.
+```sh
 ./microshell
 ```
+
+## todo
+### microshell.c
+- PATH dont change for everyone
+- config file for PATH etc.
+- ctrC line problem
+### handling_input.c
+- weird cursor on the end of the line

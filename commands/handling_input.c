@@ -76,7 +76,6 @@ void clear_input(char* prompt, const char *cmd) {
         }
     }
     fflush(stdout);
-
 }
 
 // Show a command on the current line
@@ -90,7 +89,6 @@ void show_command(char* prompt, const char *cmd) {
 void move_cursor(const char* cmd, char* prompt, int* pos, int move){
     printf("\001\033[%dG\001", (int)(strlen(prompt) + *pos + 1) % terminal_width());
     fflush(stdout);
-
 }
 
 // Handle input with history navigation

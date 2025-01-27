@@ -87,7 +87,7 @@ void show_command(char* prompt, const char *cmd) {
 
 // Move terminal cursor to the correct position
 void move_cursor(const char* cmd, char* prompt, int* pos, int move){
-    printf("\001\033[%dG\001", (int)(strlen(prompt) + *pos + 1) % terminal_width());
+    printf("\001\033[%dG\002", (int)(strlen(prompt) + *pos + 1) % terminal_width());
     fflush(stdout);
 }
 

@@ -89,8 +89,8 @@ void add_to_history(const char *cmd) {
 }
 
 // Clear input
-void clear_input(char* prompt, const char *cmd) {
-    int cmd_lines = (strlen(cmd) + strlen(prompt) - 1) / terminal_width() + 1; // "+2" for "> " prompt
+void clear_input(int prompt_len, const char *cmd) {
+    int cmd_lines = (strlen(cmd) + prompt_len - 1) / terminal_width() + 1; // "+2" for "> " prompt
     for (int i = 0; i < cmd_lines; i++) {
         printf("\001\33[2K\r\002"); // Clear the current line
         if (i < cmd_lines - 1) {
@@ -108,8 +108,8 @@ void show_command(char* prompt, const char *cmd) {
 }
 
 // Move terminal cursor to the correct position
-void move_cursor(const char* cmd, char* prompt, int* pos, int move){
-    printf("\001\033[%dG\002", (int)(strlen(prompt) + *pos + 1) % terminal_width());
+void move_cursor(const char* cmd, int prompt_len, int* pos, int move){
+    printf("\001\033[%dG\002", (prompt_len + *pos + 1) % terminal_width());
     fflush(stdout);
 }
 
@@ -152,7 +152,9 @@ int gen_prompt(char* prompt){
     }
 
     snprintf(prompt, 4096, RESET_TEXT"!microshell!"BLUE_TEXT"%s@%s "GREEN_TEXT"%s"RESET_TEXT" $ ", user, hostname, cwd);
-    return 0;
+    char vis_propmt[1024];
+    sprintf(vis_propmt, "!microshell!%s@%s %s $ ", user, hostname, cwd);
+    return strlen(vis_propmt);
 }
 
 void handle_sigint(int sig) {
@@ -191,7 +193,8 @@ int main(){
     char arguments[1024];
 
     char prompt[8192];
-    if(gen_prompt(prompt) == 1){
+    int prompt_len;
+    if((prompt_len = gen_prompt(prompt)) == 1){
         exit(1);
     }
 
@@ -303,7 +306,7 @@ int main(){
                 return 0;
             }
 
-            if(gen_prompt(prompt) == 1){
+            if((prompt_len = gen_prompt(prompt)) == 1){
                 exit(1);
             }
 
@@ -322,7 +325,7 @@ int main(){
                     if (seq[1] == 'A') { // Up arrow
                         if (history_index > 0) {
                             history_index--;
-                            clear_input(prompt, cmd);
+                            clear_input(prompt_len, cmd);
                             show_command(prompt, history[history_index]);
                             strcpy(cmd, history[history_index]);
                             cmd_len = strlen(cmd);
@@ -331,14 +334,14 @@ int main(){
                     } else if (seq[1] == 'B') { // Down arrow
                         if (history_index < history_count - 1) {
                             history_index++;
-                            clear_input(prompt, cmd);
+                            clear_input(prompt_len, cmd);
                             show_command(prompt, history[history_index]);
                             strcpy(cmd, history[history_index]);
                             cmd_len = strlen(cmd);
                             cmd_cur = cmd_len;
                         } else if (history_index == history_count - 1) {
                             history_index++;
-                            clear_input(prompt, cmd);
+                            clear_input(prompt_len, cmd);
                             memset(cmd, 0, sizeof(cmd));
                             write(STDOUT_FILENO, prompt, strlen(prompt));
                             fflush(stdout);
@@ -348,37 +351,37 @@ int main(){
                     } else if (seq[1] == 'C') { // Right arrow
                         if (cmd_cur < cmd_len) {
                             cmd_cur++; // Move logical cursor right
-                            clear_input(prompt, cmd);
+                            clear_input(prompt_len, cmd);
                             show_command(prompt, cmd);
 
                             // Move terminal cursor
-                            move_cursor(cmd, prompt, &cmd_cur, 1);
+                            move_cursor(cmd, prompt_len, &cmd_cur, 1);
                         }
                     } else if (seq[1] == 'D') { // Left arrow
                         if (cmd_cur > 0) {
                             cmd_cur--; // Move logical cursor left
-                            clear_input(prompt, cmd);
+                            clear_input(prompt_len, cmd);
                             show_command(prompt, cmd);
 
                             
-                            move_cursor(cmd, prompt, &cmd_cur, -1);
+                            move_cursor(cmd, prompt_len, &cmd_cur, -1);
                         }
                     }
                 }
             }
         } else if (c == 127) { // Backspace
             if (cmd_len > 0 && cmd_cur > 0) {
-                clear_input(prompt, cmd);
+                clear_input(prompt_len, cmd);
                 delete_inside(cmd, &cmd_cur, &cmd_len);
                 show_command(prompt, cmd);
-                move_cursor(cmd, prompt, &cmd_cur, -1);
+                move_cursor(cmd, prompt_len, &cmd_cur, -1);
             }
         } else { // Regular characters
             if (cmd_len < MAX_CMD_LEN){
-                clear_input(prompt, cmd);
+                clear_input(prompt_len, cmd);
                 insert_inside(cmd, &cmd_cur, &cmd_len, c);
                 show_command(prompt, cmd);
-                move_cursor(cmd, prompt, &cmd_cur, 1);
+                move_cursor(cmd, prompt_len, &cmd_cur, 1);
             }
         }
     }

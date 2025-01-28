@@ -204,6 +204,7 @@ int gen_prompt(char* prompt){
 
     if (strlen(home_dir) <= strlen(whole_cwd)){
         strncpy(possible_home, whole_cwd, strlen(home_dir));
+        possible_home[strlen(home_dir)] = '\0';
 
         if (strcmp(possible_home, home_dir) == 0){
             snprintf(cwd, sizeof(cwd), "~%s", whole_cwd + strlen(home_dir));
@@ -239,12 +240,19 @@ int mycd(int argc, char **argv){
     printf("%s\n", argv[0]);
     printf("%s\n", argv[1]);
 
-    char* direcotry = getenv("HOME");
+    char* home_dir = getenv("HOME");
+    char directory[4096];
 
     if (argc != 0){
-        direcotry = argv[1];
+        if (argv[1][0] == '~'){
+            sprintf(directory, "%s%s", home_dir, argv[1] + 1);
+        }
+        else {
+            strcpy(directory, argv[1]);
+        }
     }
-    if (chdir(direcotry) != 0){
+    // printf("next dir:%s", directory);
+    if (chdir(directory) != 0){
         printf("problem with chdir\n");
         return 1;
     }

@@ -172,8 +172,8 @@ void move_cursor(const char* cmd, int prompt_len, int* pos, int move){
 int gen_prompt(char* prompt){
     char whole_cwd[4096];
     char cwd[4096];
-    // char* user = getlogin();
-    char user[1024];
+    char* user = getlogin();
+    // char user[1024];
     
     char hostname[1024];
 
@@ -182,10 +182,10 @@ int gen_prompt(char* prompt){
     //     return 1;
     // }
 
-    if (gethostname(hostname, sizeof(hostname)) != 0){
-        printf(RED_TEXT"gethostname() error?\n");
-        return 1;
-    }
+    // if (gethostname(hostname, sizeof(hostname)) != 0){
+    //     printf(RED_TEXT"gethostname() error?\n");
+    //     return 1;
+    // }
 
     if (getcwd(whole_cwd, sizeof(whole_cwd)) == NULL) {
         printf(RED_TEXT"getcwd() error?\n");

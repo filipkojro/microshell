@@ -19,6 +19,19 @@ char* concat(const char *s1, const char *s2) {
     return result;
 }
 
+void parse_directory(char* output_direcotry, char* input_directory){
+    char* home_dir = getenv("HOME");
+
+    if (input_directory != 0){
+        if (input_directory[0] == '~'){
+            sprintf(output_direcotry, "%s%s", home_dir, input_directory + 1);
+        }
+        else {
+            strcpy(output_direcotry, input_directory);
+        }
+    }
+}
+
 int main(int argc, char **argv) {
     DIR *dir;
     struct dirent *entry;
@@ -35,7 +48,7 @@ int main(int argc, char **argv) {
     // handling arguments
 
     for (int i = 1; i < argc; i++){
-        printf("%d:%s\n", i, argv[i]);
+        // printf("%d:%s\n", i, argv[i]);
 
         if (strcmp(argv[i], "-l") == 0) {
             as_list_flag = 1;
@@ -45,7 +58,8 @@ int main(int argc, char **argv) {
             all_flag = 1;
             continue;
         }
-        strcpy(directory, argv[i]);
+        parse_directory(directory, argv[i]);
+        // strcpy(directory, argv[i]);
     }
 
     // printf("what is my directory: %s\n\n\n", directory);

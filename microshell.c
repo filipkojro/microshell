@@ -184,10 +184,10 @@ int gen_prompt(char* prompt){
     //     return 1;
     // }
 
-    // if (gethostname(hostname, sizeof(hostname)) != 0){
-    //     printf(RED_TEXT"gethostname() error?\n");
-    //     return 1;
-    // }
+    if (gethostname(hostname, sizeof(hostname)) != 0){
+        printf(RED_TEXT"gethostname() error?\n");
+        return 1;
+    }
 
     if (getcwd(whole_cwd, sizeof(whole_cwd)) == NULL) {
         printf(RED_TEXT"getcwd() error?\n");
@@ -236,26 +236,30 @@ void handle_sigint(int sig) {
     return;
 }
 
+void parse_directory(char* output_direcotry, char* input_directory){
+    char* home_dir = getenv("HOME");
+    char directory[4096];
+
+    if (input_directory != 0){
+        if (input_directory[0] == '~'){
+            sprintf(output_direcotry, "%s%s", home_dir, input_directory + 1);
+        }
+        else {
+            strcpy(output_direcotry, input_directory);
+        }
+    }
+}
+
 int mycd(int argc, char **argv){
     printf("%s\n", argv[0]);
     printf("%s\n", argv[1]);
 
-    char* home_dir = getenv("HOME");
     char directory[4096];
 
-    if (argc != 0){
-        if (argv[1][0] == '~'){
-            sprintf(directory, "%s%s", home_dir, argv[1] + 1);
-        }
-        else {
-            strcpy(directory, argv[1]);
-        }
-    }
+    parse_directory(directory, argv[1]);
+
     // printf("next dir:%s", directory);
-    if (chdir(directory) != 0){
-        printf("problem with chdir\n");
-        return 1;
-    }
+    if (chdir(directory) != 0) return 1;
     return 0;
 }
 
@@ -339,14 +343,13 @@ int main(){
                     printf("nie ma takiego");
                     }
                     else {
-                        printf("lista[%d]=%s\n", i, value);
+                        // printf("lista[%d]=%s\n", i, value);
                         argv[i] = strdup(value);
                     }
                 }
                 list_free(arguments);
                 
-                // Creating argv
-                for (int i = 0; i < argc; i++) printf("argv:%s\n", argv[i]);
+                // for (int i = 0; i < argc; i++) printf("argv:%s\n", argv[i]);
                 argv[argc] = NULL;
 
                 if (strcmp(argv[0], "exit") == 0){
@@ -355,9 +358,9 @@ int main(){
                     disable_raw_mode();
                     exit(0);
                 }
-                else if (strcmp(argv[0], "mycd") == 0){
+                else if (strcmp(argv[0], "mycd") == 0 || strcmp(argv[0], "cd") == 0){
                     if (mycd(argc, argv) != 0){
-                        printf("proglem with mycd\n");
+                        printf(RED_TEXT"\aunknown location\n");
                     }
                 }
                 else {

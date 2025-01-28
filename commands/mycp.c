@@ -1,6 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
+
+void parse_directory(char* output_direcotry, char* input_directory){
+    char* home_dir = getenv("HOME");
+
+    if (input_directory != 0){
+        if (input_directory[0] == '~'){
+            sprintf(output_direcotry, "%s%s", home_dir, input_directory + 1);
+        }
+        else {
+            strcpy(output_direcotry, input_directory);
+        }
+    }
+}
 
 int main(int argc, char **argv){
 
@@ -13,9 +27,15 @@ int main(int argc, char **argv){
     // printf("%s\n",argv[1]);
     // printf("%s\n",argv[2]);
 
-    FILE* infptr = fopen(argv[1], "r");
+    char in_directory[4096];
+    char out_directory[4096];
 
-    FILE* outfptr = fopen(argv[2], "w");
+    parse_directory(in_directory, argv[1]);
+    parse_directory(out_directory, argv[2]);
+
+    FILE* infptr = fopen(in_directory, "r");
+
+    FILE* outfptr = fopen(out_directory, "w");
 
     if (infptr == NULL) {
         perror("Could not open file");

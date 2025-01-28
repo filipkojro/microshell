@@ -2,24 +2,26 @@
 
 ## Run / build
 
-### Building (linux / mac)
+### Building and running (linux / mac)
 u need `gcc`, `make`
 ```sh
 git clone https://github.com/filipkojro/microshell.git
 cd microshell
 make
-```
-
-### running (linux / mac)
-While running you have to be in microshell directory.
-```sh
 ./microshell
 ```
 
-## todo
-### microshell.c
-- PATH dont change for everyone
-- config file for PATH etc.
-- ctrC line problem
-### handling_input.c
-- weird cursor on the end of the line
+## losowe informacje
+- obsluga ctrl+c
+- historia w strzaklach
+- propmpt (login + host + path)
+- kolory :o
+- obsluga bledow programow
+- wykonywanie programow z PATH
+- kilka zaimplementowanych programow:
+    - mycd (jest "alias" na cd bo sie czesto myli)
+    - myhelp
+    - myls  + flagi `-a` ,`-l`
+    - mycat
+    - colortest ...?
+- zamiana `~` na HOMEDIR i z powrotem

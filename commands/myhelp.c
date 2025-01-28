@@ -7,6 +7,9 @@ int main(){
                         "Dostepne komendy:\n"
                         " - help\n"
                         " - exit\n"
+                        " - myls\n"
+                        " - mycd\n"
+                        " - mycat\n"
                         " - myls\n";
     printf("%s\n", help_propmt);
     return 0;

@@ -351,31 +351,31 @@ int main(){
                     if (mycd(argc, argv) != 0){
                         printf("proglem with mycd\n");
                     }
-                    continue;
-                    
-                }
-
-                int childpid;
-
-                if ((childpid = fork()) != 0){
-                    // printf("rodzic?\n");
-
-                    int status;
-                    wait(&status);
-
-                    if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
-                        printf(RED_TEXT"\aError number: %d\n"RESET_TEXT, WEXITSTATUS(status));
-                    }
                 }
                 else {
-                    signal(SIGINT, SIG_DFL);
+                    int childpid;
 
-                    execvp(argv[0], argv);
-                    printf(RED_TEXT"nie ma takiej komendy\n");
-                    _exit(errno);
+                    if ((childpid = fork()) != 0){
+                        // printf("rodzic?\n");
 
-                    return 0;
+                        int status;
+                        wait(&status);
+
+                        if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
+                            printf(RED_TEXT"\aError number: %d\n"RESET_TEXT, WEXITSTATUS(status));
+                        }
+                    }
+                    else {
+                        signal(SIGINT, SIG_DFL);
+
+                        execvp(argv[0], argv);
+                        printf(RED_TEXT"nie ma takiej komendy\n");
+                        _exit(errno);
+
+                        return 0;
+                    }
                 }
+                
 
                 if((prompt_len = gen_prompt(prompt)) == 1){
                     exit(1);

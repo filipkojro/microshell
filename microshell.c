@@ -173,6 +173,8 @@ int gen_prompt(char* prompt){
     char whole_cwd[4096];
     char cwd[4096];
     char* user = getlogin();
+    if (user == NULL) user = "";
+    // user = getlogin();
     // char user[1024];
     
     char hostname[1024];
@@ -288,96 +290,96 @@ int main(){
                 // printf("You entered: %s\n", cmd);
             
 
-            // add_history(inp);
+                // add_history(inp);
 
-            
-            list* arguments;
-
-            list_create(&arguments);
-            
-            int argument_coutner = 0;
-            char cur_cmd[MAX_CMD_LEN + 1] = {0};
-            int argc = 0;
-
-            for (int i = 0; i < cmd_len; i++){
-                if (cmd[i] == ' '){
-                    if (argument_coutner > 0){
-                        memcpy(cur_cmd, cmd + i - argument_coutner, argument_coutner);
-                        list_append(arguments, cur_cmd);
-                        memset(cur_cmd, 0, argument_coutner);
-                        argc++;
-                    }
-                    
-                    argument_coutner = 0;
-                }
-                else {
-                    argument_coutner++;
-                }
-            }
-            if (argument_coutner > 0){
-                memcpy(cur_cmd, cmd + cmd_len - argument_coutner, argument_coutner);
-                list_append(arguments, cur_cmd);
-                memset(cur_cmd, 0, argument_coutner);
-                argc++;
-            }
-
-            char* argv[argc + 1];
-
-            char* value;
-            for (int i = 0; i < argc; i++){
-                if (list_read(arguments, i, &value)) {
-                printf("nie ma takiego");
-                }
-                else {
-                    printf("lista[%d]=%s\n", i, value);
-                    argv[i] = strdup(value);
-                }
-            }
-            list_free(arguments);
-            
-            // Creating argv
-            for (int i = 0; i < argc; i++) printf("%s\n", argv[i]);
-            argv[argc + 1] = NULL;
-
-            if (strcmp(argv[0], "exit") == 0){
-                printf("leaving :)\n");
-                signal(SIGINT, SIG_DFL);
-                disable_raw_mode();
-                exit(0);
-            }
-            else if (strcmp(argv[0], "mycd") == 0){
-                if (mycd(argc, argv) != 0){
-                    printf("proglem with mycd\n");
-                }
-                continue;
                 
-            }
+                list* arguments;
 
-            int childpid;
+                list_create(&arguments);
+                
+                int argument_coutner = 0;
+                char cur_cmd[MAX_CMD_LEN + 1] = {0};
+                int argc = 0;
 
-            if ((childpid = fork()) != 0){
-                // printf("rodzic?\n");
-
-                int status;
-                wait(&status);
-
-                if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
-                    printf(RED_TEXT"\aError number: %d\n"RESET_TEXT, WEXITSTATUS(status));
+                for (int i = 0; i < cmd_len; i++){
+                    if (cmd[i] == ' '){
+                        if (argument_coutner > 0){
+                            memcpy(cur_cmd, cmd + i - argument_coutner, argument_coutner);
+                            list_append(arguments, cur_cmd);
+                            memset(cur_cmd, 0, argument_coutner);
+                            argc++;
+                        }
+                        
+                        argument_coutner = 0;
+                    }
+                    else {
+                        argument_coutner++;
+                    }
                 }
-            }
-            else {
-                signal(SIGINT, SIG_DFL);
+                if (argument_coutner > 0){
+                    memcpy(cur_cmd, cmd + cmd_len - argument_coutner, argument_coutner);
+                    list_append(arguments, cur_cmd);
+                    memset(cur_cmd, 0, argument_coutner);
+                    argc++;
+                }
 
-                execvp(argv[0], argv + 1);
-                printf(RED_TEXT"nie ma takiej komendy\n");
-                _exit(errno);
+                char* argv[argc + 1];
 
-                return 0;
-            }
+                char* value;
+                for (int i = 0; i < argc; i++){
+                    if (list_read(arguments, i, &value)) {
+                    printf("nie ma takiego");
+                    }
+                    else {
+                        printf("lista[%d]=%s\n", i, value);
+                        argv[i] = strdup(value);
+                    }
+                }
+                list_free(arguments);
+                
+                // Creating argv
+                for (int i = 0; i < argc; i++) printf("argv:%s\n", argv[i]);
+                argv[argc] = NULL;
 
-            if((prompt_len = gen_prompt(prompt)) == 1){
-                exit(1);
-            }
+                if (strcmp(argv[0], "exit") == 0){
+                    printf("leaving :)\n");
+                    signal(SIGINT, SIG_DFL);
+                    disable_raw_mode();
+                    exit(0);
+                }
+                else if (strcmp(argv[0], "mycd") == 0){
+                    if (mycd(argc, argv) != 0){
+                        printf("proglem with mycd\n");
+                    }
+                    continue;
+                    
+                }
+
+                int childpid;
+
+                if ((childpid = fork()) != 0){
+                    // printf("rodzic?\n");
+
+                    int status;
+                    wait(&status);
+
+                    if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
+                        printf(RED_TEXT"\aError number: %d\n"RESET_TEXT, WEXITSTATUS(status));
+                    }
+                }
+                else {
+                    signal(SIGINT, SIG_DFL);
+
+                    execvp(argv[0], argv);
+                    printf(RED_TEXT"nie ma takiej komendy\n");
+                    _exit(errno);
+
+                    return 0;
+                }
+
+                if((prompt_len = gen_prompt(prompt)) == 1){
+                    exit(1);
+                }
             }
 
 

@@ -8,8 +8,6 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 
-#define true 1
-#define false 0
 
 // colors using ANSI escape code \033[1;{color code}m
 #define BLINK "\001\033[5m\002"
@@ -56,6 +54,64 @@ void delete_inside(char* cmd, int* pos, int* len){
     (*len)--;
     free(temp);
     cmd[*len] = '\0';
+}
+
+typedef struct list {
+    char* value;
+    struct list* next_node;
+} list;
+
+int list_create(list** home_node) {
+    *home_node = (list*)malloc(sizeof(list));
+    if (*home_node == NULL) return 1;
+    (*home_node)->value = NULL;
+    (*home_node)->next_node = NULL;
+    return 0;
+}
+
+int list_append(list* home_node, char* value){
+    if (strlen(value) >= 2048) return 1;
+
+    list* current_node = home_node;
+
+    while (current_node->next_node != NULL){
+        current_node = current_node->next_node;
+    }
+
+    list* next_node = (list*)malloc(sizeof(list));
+    if (next_node == NULL) return 1;
+    
+    next_node->value = strdup(value);
+    if (next_node->value == NULL) return 1;
+
+    next_node->next_node = NULL;
+    current_node->next_node = next_node;
+
+    return 0;
+}
+
+int list_free(list* home_node){
+    list* current_node = home_node;
+    list* next_node;
+
+    while (current_node != NULL){
+        next_node = current_node->next_node;
+        free(current_node->value);
+        free(current_node);
+        current_node = next_node;
+    }
+    return 0;
+}
+
+int list_read(list* home_node, int position, char** value){
+    list* current_node = home_node;
+
+    for (int i = 0; i <= position; i++){
+        if (current_node->next_node == NULL) return 1;
+        current_node = current_node->next_node;
+    }
+    *value = current_node->value;
+    return 0;
 }
 
 int terminal_width(){
@@ -116,8 +172,15 @@ void move_cursor(const char* cmd, int prompt_len, int* pos, int move){
 int gen_prompt(char* prompt){
     char whole_cwd[4096];
     char cwd[4096];
-    char* user = getlogin();
+    // char* user = getlogin();
+    char user[1024];
+    
     char hostname[1024];
+
+    // if (getlogin_r(user, sizeof(user)) != 0){
+    //     printf(RED_TEXT"getlogin() error?\n");
+    //     return 1;
+    // }
 
     if (gethostname(hostname, sizeof(hostname)) != 0){
         printf(RED_TEXT"gethostname() error?\n");
@@ -141,20 +204,28 @@ int gen_prompt(char* prompt){
         strncpy(possible_home, whole_cwd, strlen(home_dir));
 
         if (strcmp(possible_home, home_dir) == 0){
-            strcpy(cwd, concat("~", whole_cwd + strlen(home_dir)));
+            snprintf(cwd, sizeof(cwd), "~%s", whole_cwd + strlen(home_dir));
+            // strcpy(cwd, concat("~", whole_cwd + strlen(home_dir)));
         }
         else {
-            strcpy(cwd, whole_cwd);
+            strncpy(cwd, whole_cwd, sizeof(cwd) - 1);
+            cwd[sizeof(cwd) - 1] = '\0'; // Null-terminate
+            // strcpy(cwd, whole_cwd);
         }
     }
     else {
-        strcpy(cwd, whole_cwd);
+        strncpy(cwd, whole_cwd, sizeof(cwd) - 1);
+        cwd[sizeof(cwd) - 1] = '\0'; // Null-terminate
+        // strcpy(cwd, whole_cwd);
     }
 
     snprintf(prompt, 4096, RESET_TEXT"!microshell!"BLUE_TEXT"%s@%s "GREEN_TEXT"%s"RESET_TEXT" $ ", user, hostname, cwd);
-    char vis_propmt[1024];
-    sprintf(vis_propmt, "!microshell!%s@%s %s $ ", user, hostname, cwd);
-    return strlen(vis_propmt);
+
+    
+
+    int vis_propmt = (int)(strlen(user) + strlen(hostname) + strlen(cwd) + strlen("!microshell!@  $ "));
+
+    return vis_propmt;
 }
 
 void handle_sigint(int sig) {
@@ -189,9 +260,6 @@ int main(){
     // Addming microshell commands to PATH
     setenv("PATH", concat(concat(cwd, "/commands/bin:"), getenv("PATH")), 1);
 
-    char command[32];
-    char arguments[1024];
-
     char prompt[8192];
     int prompt_len;
     if((prompt_len = gen_prompt(prompt)) == 1){
@@ -216,67 +284,68 @@ int main(){
             // Code logic after everyting is inserted
             if (cmd_len > 0) {
                 add_to_history(cmd);
-                printf("You entered: %s\n", cmd);
-            }
 
+                // printf("You entered: %s\n", cmd);
+            
 
             // add_history(inp);
 
-            sscanf(cmd, "%s%[^\n]", command, arguments);
+            
+            list* arguments;
 
-            // counting arguments
+            list_create(&arguments);
+            
+            int argument_coutner = 0;
+            char cur_cmd[MAX_CMD_LEN + 1] = {0};
             int argc = 0;
-            int last_space = 0;
-            int argument_problem = 0;
-            // printf("arguments:%s:", arguments);
 
-            for (int count = 0; c < strlen(arguments); count++){
-                if (arguments[count] == ' ') {
-                    if (last_space != 1){
+            for (int i = 0; i < cmd_len; i++){
+                if (cmd[i] == ' '){
+                    if (argument_coutner > 0){
+                        memcpy(cur_cmd, cmd + i - argument_coutner, argument_coutner);
+                        list_append(arguments, cur_cmd);
+                        memset(cur_cmd, 0, argument_coutner);
                         argc++;
-                        last_space = 1;
                     }
+                    
+                    argument_coutner = 0;
                 }
-                else last_space = 0;
+                else {
+                    argument_coutner++;
+                }
             }
-            if (last_space == 1){
-                argc--;
-            }
-            if (argument_problem == 1){
-                continue;
+            if (argument_coutner > 0){
+                memcpy(cur_cmd, cmd + cmd_len - argument_coutner, argument_coutner);
+                list_append(arguments, cur_cmd);
+                memset(cur_cmd, 0, argument_coutner);
+                argc++;
             }
 
-            char args[argc + 1][1024];
-            char* argv[argc + 2];
+            char* argv[argc + 1];
 
-            strcpy(args[0], command);
+            char* value;
+            for (int i = 0; i < argc; i++){
+                if (list_read(arguments, i, &value)) {
+                printf("nie ma takiego");
+                }
+                else {
+                    printf("lista[%d]=%s\n", i, value);
+                    argv[i] = strdup(value);
+                }
+            }
+            list_free(arguments);
             
-            char ar[1024];
-            char rest[1024];
-            char rest2[1024];
-            
-            strcpy(rest, arguments);
-
-            // Inserting arguments to vector
-            for (int i = 1; i < argc + 1; i++){
-                
-                sscanf(rest, " %s%[^\0]", ar, rest2);
-                strcpy(args[i], ar);
-                strcpy(rest, rest2);
-            }
-
-            for (int i = 0; i < argc + 1; i++){
-                argv[i] = args[i];
-            }
+            // Creating argv
+            for (int i = 0; i < argc; i++) printf("%s\n", argv[i]);
             argv[argc + 1] = NULL;
 
-            if (strcmp(command, "exit") == 0){
+            if (strcmp(argv[0], "exit") == 0){
                 printf("leaving :)\n");
                 signal(SIGINT, SIG_DFL);
                 disable_raw_mode();
                 exit(0);
             }
-            else if (strcmp(command, "mycd") == 0){
+            else if (strcmp(argv[0], "mycd") == 0){
                 if (mycd(argc, argv) != 0){
                     printf("proglem with mycd\n");
                 }
@@ -293,13 +362,13 @@ int main(){
                 wait(&status);
 
                 if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
-                    printf("Error number: %d\n", WEXITSTATUS(status));
+                    printf(RED_TEXT"\aError number: %d\n"RESET_TEXT, WEXITSTATUS(status));
                 }
             }
             else {
                 signal(SIGINT, SIG_DFL);
 
-                execvp(command, argv);
+                execvp(argv[0], argv + 1);
                 printf(RED_TEXT"nie ma takiej komendy\n");
                 _exit(errno);
 
@@ -308,6 +377,7 @@ int main(){
 
             if((prompt_len = gen_prompt(prompt)) == 1){
                 exit(1);
+            }
             }
 
 

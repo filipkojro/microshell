@@ -1,3 +1,4 @@
 microshell
 commands/bin/*
 .vscode/
+alpineimage/*

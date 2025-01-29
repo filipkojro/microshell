@@ -8,7 +8,14 @@ u need `gcc`, `make`
 git clone https://github.com/filipkojro/microshell.git
 cd microshell
 make
-./microshell
+tar -xzvf alpineimage.tar.gz
+sudo ./microshell
+```
+### !!! to run microdocker inside microshell u need to run microshell using sudo `sudo ./microshell` or root user !!!
+
+alpineimage compressed using
+```sh
+sudo tar -czvf alpineimage.tar.gz alpineimage
 ```
 
 ## losowe informacje
@@ -18,10 +25,12 @@ make
 - kolory :o
 - obsluga bledow programow
 - wykonywanie programow z PATH
-- kilka zaimplementowanych programow:
-    - mycd (jest "alias" na cd bo sie czesto myli)
-    - myhelp
-    - myls  + flagi `-a` ,`-l`
-    - mycat
-    - colortest ...?
 - zamiana `~` na HOMEDIR i z powrotem
+- kilka zaimplementowanych programow:
+    - `mycd` (jest "alias" na `cd` bo sie czesto myli)
+    - `myhelp`
+    - `myls`  + flagi `-a` ,`-l`
+    - `mycat`
+    - `colortest` ...?
+    - `microdocker run [COMMAND] [ARGUMENTS]` example: [COMMAND] = `python3`; [ARGUMENT] = `/home/main.py`
+    - `httpserver [PORT] [HTTP_FILE_PATH]`

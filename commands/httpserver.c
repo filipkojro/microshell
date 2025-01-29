@@ -6,10 +6,23 @@
 #include <sys/socket.h>
 
 #define PORT 8080 // Define the port for the HTTP server
-#define RESPONSE "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<h1>Hello, World!</h1>"
+#define RESPONSE_START "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"
+
+void parse_directory(char* output_direcotry, char* input_directory){
+    char* home_dir = getenv("HOME");
+
+    if (input_directory != 0){
+        if (input_directory[0] == '~'){
+            sprintf(output_direcotry, "%s%s", home_dir, input_directory + 1);
+        }
+        else {
+            strcpy(output_direcotry, input_directory);
+        }
+    }
+}
 
 // Function to handle client requests
-void handle_client(int client_socket) {
+void handle_client(int client_socket, char* http_path) {
     char buffer[1024];
     int bytes_read;
 
@@ -26,13 +39,35 @@ void handle_client(int client_socket) {
     printf("Received request:\n%s\n", buffer);
 
     // Send a simple HTTP response
-    write(client_socket, RESPONSE, strlen(RESPONSE));
+    write(client_socket, RESPONSE_START, strlen(RESPONSE_START));
+
+    char directory[4096];
+
+    parse_directory(directory, http_path);
+
+    char dir_buffer[1024];
+
+    FILE* fptr = fopen(directory, "r");
+    if (fptr == NULL) {
+        perror("Failed to open file");
+        close(client_socket);
+        return;
+    }
+    int num;
+    while ((num = fread(dir_buffer, 1, sizeof(dir_buffer), fptr)) > 0) {
+        write(client_socket, buffer, num);
+    }
+
+    fclose(fptr);
 
     // Close the connection to the client
     close(client_socket);
 }
 
-int main() {
+int main(int argc, char **argv) {
+    int server_port = atoi(argv[1]);
+    char* server_html_path = argv[2];
+
     int server_socket, client_socket;
     struct sockaddr_in server_addr, client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
@@ -47,7 +82,7 @@ int main() {
     // Configure the server address struct
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons(PORT);
+    server_addr.sin_port = htons(server_port);
 
     // Bind the socket to the specified port
     if (bind(server_socket, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
@@ -63,7 +98,7 @@ int main() {
         return 1;
     }
 
-    printf("HTTP server is running on port %d\n", PORT);
+    printf("HTTP server is running on port %d\n", server_port);
 
     // Main loop to accept and handle incoming connections
     while (1) {
@@ -75,7 +110,7 @@ int main() {
         }
 
         // Handle the client's request in a separate function
-        handle_client(client_socket);
+        handle_client(client_socket, server_html_path);
     }
 
     // Close the server socket

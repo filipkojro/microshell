@@ -10,7 +10,9 @@ int main(){
                         " - myls\n"
                         " - mycd\n"
                         " - mycat\n"
-                        " - myls\n";
+                        " - myls\n"
+                        " - microdocker run [COMMAND] [ARGUMENTS]\n"
+                        " - httpserver [PORT] [HTTP_FILE_PATH]\n";
     printf("%s\n", help_propmt);
     return 0;
 }

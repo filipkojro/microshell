@@ -1,6 +1,6 @@
 flags = -Wall
 
-all: microshell commands/bin colortest mycat mycp myls myhelp test
+all: microshell commands/bin colortest mycat mycp myls myhelp microdocker httpserver test
 
 test: commands/test.c
 	gcc -o commands/bin/test commands/test.c $(flags)
@@ -22,6 +22,12 @@ myls: commands/myls.c
 
 myhelp: commands/myhelp.c
 	gcc -o commands/bin/myhelp commands/myhelp.c $(flags)
+
+microdocker: commands/microdocker.c
+	gcc -o commands/bin/microdocker commands/microdocker.c $(flags)
+
+httpserver: commands/httpserver.c
+	gcc -o commands/bin/httpserver commands/httpserver.c $(flags)
 
 commands/bin:
 	mkdir -p commands/bin

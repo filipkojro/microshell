@@ -9,9 +9,9 @@ git clone https://github.com/filipkojro/microshell.git
 cd microshell
 make
 tar -xzvf alpineimage.tar.gz
-sudo ./microshell
+./microshell
 ```
-### !!! to run microdocker inside microshell u need to run microshell using sudo `sudo ./microshell` or root user !!!
+### !!! to run microdocker inside microshell u need to run microshell using sudo `sudo ./commands/bin/microshell` or root user !!!
 
 alpineimage compressed using
 ```sh
@@ -32,5 +32,5 @@ sudo tar -czvf alpineimage.tar.gz alpineimage
     - `myls`  + flagi `-a` ,`-l`
     - `mycat`
     - `colortest` ...?
-    - `microdocker run [COMMAND] [ARGUMENTS]` example: [COMMAND] = `python3`; [ARGUMENT] = `/home/main.py`
+    - `sudo ./commands/bin/microdocker run [COMMAND] [ARGUMENTS]` example: [COMMAND] = `python3`; [ARGUMENT] = `/home/main.py`
     - `httpserver [PORT] [HTTP_FILE_PATH]`

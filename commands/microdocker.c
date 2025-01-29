@@ -43,7 +43,10 @@ int child(void* arg){
 
 int main(int argc, char **argv) {
 
-    if (argc < 3) return 1;
+    if (argc < 3) {
+        printf("za malo argumentow\npoprawne wykonanie: microdocker run [COMMAND] [ARGUMENTS]\n");
+        return 1;
+    }
 
     if (strcmp(argv[1], "run") == 0){
         

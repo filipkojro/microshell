@@ -10,35 +10,37 @@
 int child(void* arg){
     char* container_path = "alpineimage";
 
-        if (chroot(container_path) != 0) {
-            perror("chroot failed");
-            return 1;
-        }
-        
-        if (chdir("/") != 0) {
-            perror("chdir failed");
-            return 1;
-        }
+    if (chroot(container_path) != 0) {
+        perror("chroot failed");
+        return 1;
+    }
+    
+    if (chdir("/") != 0) {
+        perror("chdir failed");
+        return 1;
+    }
 
-        if (mount("proc", "/proc", "proc", 0, NULL) != 0) {
+    if (mount("proc", "/proc", "proc", 0, NULL) != 0) {
         perror("mount failed");
         return 1;
     }
 
-        char **args = (char **)arg;
-        char command[256] = "";
-        for (int i = 2; args[i] != NULL; i++) {
-            strcat(command, args[i]);
-            strcat(command, " ");
-        }
+    sethostname("container", sizeof("container"));
 
-        printf("running inside container: %s\ncommand: %s\n", container_path, command);
+    char **args = (char **)arg;
+    char command[256] = "";
+    for (int i = 2; args[i] != NULL; i++) {
+        strcat(command, args[i]);
+        strcat(command, " ");
+    }
 
-        char *new_argv[] = {"/bin/sh", "-c", command, NULL};
-        execv("/bin/sh", new_argv);
+    printf("running inside container: %s\ncommand: %s\n", container_path, command);
 
-        printf("execv failed");
-        return 1;
+    char *new_argv[] = {"/bin/sh", "-c", command, NULL};
+    execv("/bin/sh", new_argv);
+
+    printf("execv failed");
+    return 1;
 }
 
 int main(int argc, char **argv) {

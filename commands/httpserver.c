@@ -55,7 +55,7 @@ void handle_client(int client_socket, char* http_path) {
     }
     int num;
     while ((num = fread(dir_buffer, 1, sizeof(dir_buffer), fptr)) > 0) {
-        write(client_socket, buffer, num);
+        write(client_socket, dir_buffer, num);
     }
 
     fclose(fptr);

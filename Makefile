@@ -1,6 +1,5 @@
-flags = -Wall
-
 all: microshell commands/bin colortest mycat mycp myls myhelp microdocker httpserver test
+flags = 
 
 test: commands/test.c
 	gcc -o commands/bin/test commands/test.c $(flags)

@@ -370,6 +370,7 @@ int main(){
                     }
                     else {
                         signal(SIGINT, SIG_DFL);
+			disable_raw_mode();
 
                         execvp(argv[0], argv);
                         printf(RED_TEXT"nie ma takiej komendy\n");

@@ -23,15 +23,6 @@ char *history[MAX_HISTORY];
 int history_count = 0;
 int history_index = 0;
 
-char* concat(const char *s1, const char *s2) {
-    const size_t len1 = strlen(s1);
-    const size_t len2 = strlen(s2);
-    char *result = malloc(len1 + len2 + 1); // +1 for terminator
-    memcpy(result, s1, len1);
-    memcpy(result + len1, s2, len2 + 1); // +1 to copy terminator
-    return result;
-}
-
 // Insert char inside string on position
 void insert_inside(char* cmd, int* pos, int* len, char c){
     char* temp = malloc(*len);
@@ -251,12 +242,11 @@ void parse_directory(char* output_direcotry, char* input_directory){
 }
 
 int mycd(int argc, char **argv){
-    printf("%s\n", argv[0]);
-    printf("%s\n", argv[1]);
 
     char directory[4096];
 
-    parse_directory(directory, argv[1]);
+    if (argc == 1) parse_directory(directory, "~");
+    else parse_directory(directory, argv[1]);
 
     // printf("next dir:%s", directory);
     if (chdir(directory) != 0) return 1;
@@ -272,7 +262,9 @@ int main(){
         return 1;
     }
     // Addming microshell commands to PATH
-    setenv("PATH", concat(concat(cwd, "/commands/bin:"), getenv("PATH")), 1);
+    char additional_path[4096];
+    snprintf(additional_path, sizeof(additional_path), "%s/commands/bin:%s", cwd, getenv("PATH"));
+    setenv("PATH", additional_path, 1);
 
     char prompt[8192];
     int prompt_len;

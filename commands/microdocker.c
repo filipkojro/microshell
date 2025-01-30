@@ -11,17 +11,17 @@ int child(void* arg){
     char* container_path = "alpineimage";
 
     if (chroot(container_path) != 0) {
-        perror("chroot failed");
+        perror("chroot failed: u need to run as root");
         return 1;
     }
     
     if (chdir("/") != 0) {
-        perror("chdir failed");
+        perror("chdir failed: u need to run as root");
         return 1;
     }
 
     if (mount("proc", "/proc", "proc", 0, NULL) != 0) {
-        perror("mount failed");
+        perror("mount failed: u need to run as root");
         return 1;
     }
 
@@ -46,7 +46,7 @@ int child(void* arg){
 int main(int argc, char **argv) {
 
     if (argc < 3) {
-        printf("za malo argumentow\npoprawne wykonanie: microdocker run [COMMAND] [ARGUMENTS]\n");
+        printf("za malo argumentow\npoprawne wykonanie: sudo ./commands/bin/microdocker run [COMMAND] [ARGUMENTS]\n");
         return 1;
     }
 
@@ -69,6 +69,10 @@ int main(int argc, char **argv) {
         }
         waitpid(pid, NULL, 0);
         free(stack);
+    }
+    else {
+        printf("curretly only run is implemented\n");
+        return 1;
     }
     return 0;
 }

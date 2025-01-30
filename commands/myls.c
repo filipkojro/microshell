@@ -56,6 +56,10 @@ int main(int argc, char **argv) {
             all_flag = 1;
             continue;
         }
+        if (argv[i][0] == '-') {
+            printf("unknown flag\n");
+            return 1;
+        }
         parse_directory(directory, argv[i]);
         // strcpy(directory, argv[i]);
     }

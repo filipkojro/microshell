@@ -16,7 +16,7 @@
 #define BLUE_TEXT "\001\033[1;34m\002"
 #define RESET_TEXT "\001\033[1;0m\002"
 
-#define MAX_HISTORY 100
+#define MAX_HISTORY 4
 #define MAX_CMD_LEN 1024
 
 char *history[MAX_HISTORY];
@@ -132,6 +132,7 @@ void add_to_history(const char *cmd) {
     if (history_count < MAX_HISTORY) {
         history[history_count++] = strdup(cmd);
     }else{
+        free(history[0]);
         for (int i = 0; i < MAX_HISTORY - 1; i++){
             history[i] = history[i+1];
         }

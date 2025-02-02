@@ -30,7 +30,7 @@ sudo tar -czvf alpineimage.tar.gz alpineimage
     - `mycd` (jest "alias" na `cd` bo sie czesto myli)
     - `myhelp`
     - `myls`  + flagi `-a` ,`-l`
-    - `mycp [SRC] [DST]`
+    - `mycp [SRC] [DST]` dziala recursive
     - `mycat`
     - `colortest` ...?
     - `sudo ./commands/bin/microdocker run [COMMAND] [ARGUMENTS]` example: [COMMAND] = `python3`; [ARGUMENT] = `/home/main.py`

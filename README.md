@@ -2,7 +2,7 @@
 
 ## Run / build
 
-### Building and running (linux / mac)
+### (linux / mac)
 u need `gcc`, `make`
 ```sh
 git clone https://github.com/filipkojro/microshell.git
@@ -11,7 +11,7 @@ make
 tar -xzvf alpineimage.tar.gz
 ./microshell
 ```
-### !!! to run microdocker inside microshell u need to run microshell using sudo `sudo ./commands/bin/microshell` or root user !!!
+### !!! to run microdocker u need to have root privileges and use whole path to microdocker `sudo {path to microshell}/commands/bin/microdocker` !!!
 
 alpineimage compressed using
 ```sh

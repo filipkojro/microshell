@@ -131,6 +131,11 @@ void disable_raw_mode() {
 void add_to_history(const char *cmd) {
     if (history_count < MAX_HISTORY) {
         history[history_count++] = strdup(cmd);
+    }else{
+        for (int i = 0; i < MAX_HISTORY - 1; i++){
+            history[i] = history[i+1];
+        }
+        history[MAX_HISTORY - 1] = strdup(cmd);
     }
     history_index = history_count; // Reset index
 }

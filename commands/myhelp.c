@@ -8,9 +8,10 @@ int main(){
                         " - help\n"
                         " - exit\n"
                         " - myls\n"
+                        " - mycp [SRC] [DST]\n"
                         " - mycd\n"
                         " - mycat\n"
-                        " - myls\n"
+                        " - myls [-l -a]\n"
                         " - microdocker run [COMMAND] [ARGUMENTS]\n"
                         " - httpserver [PORT] [HTTP_FILE_PATH]\n";
     printf("%s\n", help_propmt);

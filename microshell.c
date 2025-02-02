@@ -367,10 +367,11 @@ int main(){
                         if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
                             printf(RED_TEXT"\aError number: %d\n"RESET_TEXT, WEXITSTATUS(status));
                         }
+                        enable_raw_mode();
                     }
                     else {
                         signal(SIGINT, SIG_DFL);
-			disable_raw_mode();
+			            disable_raw_mode();
 
                         execvp(argv[0], argv);
                         printf(RED_TEXT"nie ma takiej komendy\n");
